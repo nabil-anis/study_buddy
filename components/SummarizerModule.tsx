@@ -1,24 +1,31 @@
 import React, { useState, ChangeEvent } from 'react';
 import Card from './GlassCard';
-import { summarizeText } from '../services/geminiService';
+import { summarizeText, parseFileContent } from '../services/geminiService';
 import { SparklesIcon, UploadIcon } from './icons';
 
 const SummarizerModule: React.FC = () => {
     const [inputText, setInputText] = useState('');
     const [summary, setSummary] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isParsing, setIsParsing] = useState(false);
     const [fileName, setFileName] = useState('');
 
-    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const text = e.target?.result as string;
-          setInputText(text);
-          setFileName(file.name);
-        };
-        reader.readAsText(file);
+        setFileName(file.name);
+        setIsParsing(true);
+        setSummary('');
+        try {
+            const text = await parseFileContent(file);
+            setInputText(text);
+        } catch (error) {
+            console.error("Error parsing file:", error);
+            alert("Sorry, I couldn't read that file. Please try a different one.");
+            setFileName('');
+        } finally {
+            setIsParsing(false);
+        }
         event.target.value = '';
       }
     };
@@ -41,6 +48,8 @@ const SummarizerModule: React.FC = () => {
         }
     };
 
+    const isProcessing = isLoading || isParsing;
+
     return (
         <Card className="h-full flex flex-col">
             <div className="flex items-center mb-4">
@@ -55,20 +64,21 @@ const SummarizerModule: React.FC = () => {
                         <h3 className="font-semibold text-zinc-300">Your Text</h3>
                         <label htmlFor="file-upload-summarizer" className="cursor-pointer flex items-center gap-2 text-sm text-yellow-400 hover:text-yellow-300 transition">
                             <UploadIcon className="w-4 h-4" />
-                            {fileName ? `Uploaded: ${fileName}` : 'Upload File'}
+                            <span className="truncate max-w-[200px]">{fileName || 'Upload File'}</span>
                         </label>
-                        <input id="file-upload-summarizer" type="file" className="hidden" onChange={handleFileChange} accept=".txt,.md,.csv,.pdf,.docx" />
+                        <input id="file-upload-summarizer" type="file" className="hidden" onChange={handleFileChange} accept=".txt,.md,.csv,.pdf,.docx,.xlsx" disabled={isProcessing} />
                     </div>
                     <textarea 
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
-                        placeholder="Paste your long, boring text here, or upload a file above."
-                        className="w-full flex-grow p-4 bg-zinc-800 text-zinc-200 rounded-lg border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none"
+                        placeholder={isParsing ? "Reading your document..." : "Paste your long, boring text here, or upload a file above."}
+                        className="w-full flex-grow p-4 bg-zinc-800/50 text-zinc-200 rounded-lg border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none"
+                        disabled={isProcessing}
                     />
                 </div>
                 <div className="flex flex-col">
                     <h3 className="font-semibold mb-2 text-zinc-300">Summary</h3>
-                    <div className="w-full flex-grow p-4 bg-zinc-800 rounded-lg border border-zinc-700 overflow-y-auto">
+                    <div className="w-full flex-grow p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 overflow-y-auto">
                         {isLoading ? (
                             <div className="flex items-center justify-center h-full text-zinc-400">
                                 <p>Condensing knowledge...</p>
@@ -83,10 +93,10 @@ const SummarizerModule: React.FC = () => {
             <div className="mt-6 text-center">
                 <button 
                     onClick={handleSummarize}
-                    disabled={isLoading || !inputText}
+                    disabled={isProcessing || !inputText}
                     className="px-8 py-3 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-transform transform hover:scale-105 shadow-lg disabled:bg-yellow-400 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                    {isLoading ? 'Thinking Hard...' : 'Summarize'}
+                    {isLoading ? 'Thinking Hard...' : isParsing ? 'Reading File...' : 'Summarize'}
                 </button>
             </div>
         </Card>

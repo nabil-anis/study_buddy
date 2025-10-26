@@ -1,7 +1,7 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import { QuizQuestion } from '../types';
 import Card from './GlassCard';
-import { generateQuiz } from '../services/geminiService';
+import { generateQuiz, parseFileContent } from '../services/geminiService';
 import { BrainIcon, UploadIcon } from './icons';
 
 const QuizModule: React.FC = () => {
@@ -15,6 +15,7 @@ const QuizModule: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [fileName, setFileName] = useState('');
+  const [isParsing, setIsParsing] = useState(false);
   
   useEffect(() => {
     if (quizState === 'active' && timeLeft > 0) {
@@ -25,16 +26,22 @@ const QuizModule: React.FC = () => {
     }
   }, [timeLeft, quizState]);
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
+      setFileName(file.name);
+      setIsParsing(true);
+      try {
+        const text = await parseFileContent(file);
         setFileContent(text);
-        setFileName(file.name);
-      };
-      reader.readAsText(file);
+        setTopic(''); // Clear topic if file is uploaded
+      } catch (error) {
+        console.error("Error parsing file:", error);
+        alert("Sorry, I couldn't read that file. Please try a different one.");
+        setFileName('');
+      } finally {
+        setIsParsing(false);
+      }
       event.target.value = ''; // Reset file input
     }
   };
@@ -47,7 +54,8 @@ const QuizModule: React.FC = () => {
     setQuizState('loading');
     setQuestions([]);
     try {
-        const generatedQuestions = await generateQuiz(topic, 5, fileContent ?? undefined);
+        const quizTopic = topic || `the uploaded document: ${fileName}`;
+        const generatedQuestions = await generateQuiz(quizTopic, 5, fileContent ?? undefined);
         setQuestions(generatedQuestions);
         setCurrentQuestionIndex(0);
         setScore(0);
@@ -90,20 +98,21 @@ const QuizModule: React.FC = () => {
   };
 
   if (quizState === 'idle' || quizState === 'loading') {
+    const isLoading = quizState === 'loading' || isParsing;
     return (
       <Card className="flex flex-col items-center justify-center h-full text-center">
         <BrainIcon className="w-16 h-16 text-blue-400 mb-4" />
         <h2 className="text-2xl font-bold mb-2 text-zinc-100">AI-Powered Quiz</h2>
-        <p className="text-zinc-400 mb-6 max-w-md">Enter a topic or upload a document (.txt, .md). We'll generate a quiz to test your knowledge.</p>
+        <p className="text-zinc-400 mb-6 max-w-md">Enter a topic or upload a document (.pdf, .docx, etc.). We'll generate a quiz to test your knowledge.</p>
         
         <div className="w-full max-w-sm space-y-4">
             <input 
               type="text" 
               value={topic}
-              onChange={(e) => setTopic(e.target.value)}
+              onChange={(e) => { setTopic(e.target.value); if(e.target.value) {setFileContent(null); setFileName('');} }}
               placeholder="Enter a topic..."
-              className="w-full px-4 py-3 bg-zinc-800 rounded-lg border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-zinc-100"
-              disabled={quizState === 'loading'}
+              className="w-full px-4 py-3 bg-zinc-800/50 rounded-lg border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-zinc-100"
+              disabled={isLoading}
             />
 
             <div className="flex items-center justify-center text-zinc-500">
@@ -112,19 +121,19 @@ const QuizModule: React.FC = () => {
                 <span className="flex-grow border-t border-zinc-700"></span>
             </div>
 
-            <label htmlFor="file-upload-quiz" className="cursor-pointer w-full flex items-center justify-center gap-2 px-4 py-3 bg-zinc-800 rounded-lg border border-zinc-700 hover:bg-zinc-700 transition text-zinc-300">
+            <label htmlFor="file-upload-quiz" className="cursor-pointer w-full flex items-center justify-center gap-2 px-4 py-3 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:bg-zinc-700/50 transition text-zinc-300">
                 <UploadIcon className="w-5 h-5" />
-                <span>{fileName || 'Upload a document'}</span>
+                <span className="truncate">{fileName || 'Upload a document'}</span>
             </label>
-            <input id="file-upload-quiz" type="file" className="hidden" onChange={handleFileChange} accept=".txt,.md,.csv,.pdf,.docx" />
+            <input id="file-upload-quiz" type="file" className="hidden" onChange={handleFileChange} accept=".txt,.md,.csv,.pdf,.docx,.xlsx" disabled={isLoading} />
         </div>
         
         <button 
           onClick={handleStartQuiz}
-          disabled={quizState === 'loading'}
+          disabled={isLoading}
           className="mt-6 px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg disabled:bg-blue-500 disabled:cursor-not-allowed"
         >
-          {quizState === 'loading' ? 'Generating Brain Busters...' : 'Start Quiz'}
+          {quizState === 'loading' ? 'Generating Brain Busters...' : isParsing ? 'Reading your document...' : 'Start Quiz'}
         </button>
       </Card>
     );
@@ -150,12 +159,12 @@ const QuizModule: React.FC = () => {
     <Card className="h-full flex flex-col">
         <div className="flex justify-between items-center mb-4 text-zinc-300">
             <span className="font-semibold">Question {currentQuestionIndex + 1}/{questions.length}</span>
-            <span className="font-bold text-lg bg-zinc-800 px-3 py-1 rounded-full">
+            <span className="font-bold text-lg bg-zinc-800/50 px-3 py-1 rounded-full">
                 ⏰ {Math.floor(timeLeft / 60)}:{('0' + timeLeft % 60).slice(-2)}
             </span>
         </div>
         <div className="w-full bg-zinc-700 rounded-full h-2.5 mb-6">
-          <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}></div>
+          <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%`, transition: 'width 0.3s' }}></div>
         </div>
         <h3 className="text-xl font-semibold mb-6 flex-grow text-zinc-100">{currentQuestion.question}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -165,10 +174,10 @@ const QuizModule: React.FC = () => {
                     onClick={() => handleAnswer(option)}
                     disabled={!!userAnswer}
                     className={`p-4 rounded-lg text-left transition-all duration-300 border
-                    ${!userAnswer ? 'bg-zinc-800 border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 text-zinc-200' : ''}
+                    ${!userAnswer ? 'bg-zinc-800/50 border-zinc-700 hover:bg-zinc-700/50 hover:border-zinc-600 text-zinc-200' : ''}
                     ${userAnswer && option === currentQuestion.correctAnswer ? 'bg-teal-500 border-teal-400 text-white' : ''}
                     ${userAnswer && option !== currentQuestion.correctAnswer && option === userAnswer ? 'bg-red-500 border-red-400 text-white' : ''}
-                    ${userAnswer && option !== currentQuestion.correctAnswer && option !== userAnswer ? 'bg-zinc-800 border-zinc-700 opacity-50' : ''}
+                    ${userAnswer && option !== currentQuestion.correctAnswer && option !== userAnswer ? 'bg-zinc-800/50 border-zinc-700 opacity-50' : ''}
                     `}
                 >
                     {option}

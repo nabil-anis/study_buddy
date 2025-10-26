@@ -31,7 +31,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full relative">
+      <div className="background"></div>
       {renderContent()}
     </div>
   );
