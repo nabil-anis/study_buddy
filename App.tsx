@@ -32,7 +32,6 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full relative overflow-x-hidden">
-      <div className="background"></div>
       {renderContent()}
     </div>
   );
