@@ -54,10 +54,10 @@ const PlannerModule: React.FC = () => {
     return (
         <Card className="h-full flex flex-col">
             <div className="flex items-center mb-4">
-                <PlannerIcon className="w-8 h-8 text-green-400 mr-3" />
-                <h2 className="text-2xl font-bold text-zinc-100">AI Study Planner</h2>
+                <PlannerIcon className="w-8 h-8 text-[#ED3F27] mr-3" />
+                <h2 className="text-2xl font-bold text-[#134686]">AI Study Planner</h2>
             </div>
-            <p className="text-zinc-400 mb-6">Tell the AI your study goal, and it will generate a step-by-step plan for you.</p>
+            <p className="text-[#134686]/80 mb-6">Tell the AI your study goal, and it will generate a step-by-step plan for you.</p>
 
             <div className="flex items-center gap-2 mb-6">
                 <input
@@ -66,30 +66,30 @@ const PlannerModule: React.FC = () => {
                     onChange={(e) => setGoal(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleGeneratePlan()}
                     placeholder="e.g., 'Ace my history final next week'"
-                    className="flex-grow px-4 py-3 bg-zinc-800 rounded-full border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-zinc-100"
+                    className="flex-grow px-4 py-3 bg-white/50 rounded-full border border-[#134686]/20 placeholder:text-[#134686]/60 focus:outline-none focus:ring-2 focus:ring-[#ED3F27] text-[#134686]"
                     disabled={isLoading}
                 />
-                <button onClick={handleGeneratePlan} disabled={isLoading} className="p-3 rounded-full bg-green-600 text-white hover:bg-green-700 disabled:bg-green-500 transition">
+                <button onClick={handleGeneratePlan} disabled={isLoading} className="p-3 rounded-full bg-[#ED3F27] text-white hover:bg-[#ED3F27]/90 disabled:bg-[#ED3F27]/60 transition">
                     <SendIcon className="w-6 h-6" />
                 </button>
             </div>
             
             <div className="flex-grow overflow-y-auto pr-2">
-                {isLoading && tasks.length === 0 && <p className="text-zinc-400 text-center">Generating your master plan...</p>}
-                {tasks.length === 0 && !isLoading && <p className="text-zinc-500 text-center pt-8">Your study plan will appear here.</p>}
+                {isLoading && tasks.length === 0 && <p className="text-[#134686]/70 text-center">Generating your master plan...</p>}
+                {tasks.length === 0 && !isLoading && <p className="text-[#134686]/60 text-center pt-8">Your study plan will appear here.</p>}
                 <ul className="space-y-3">
                     {tasks.map(task => (
-                        <li key={task.id} className="flex items-center bg-zinc-800 p-3 rounded-lg">
+                        <li key={task.id} className="flex items-center bg-white/60 p-3 rounded-lg">
                             <input 
                                 type="checkbox"
                                 checked={task.completed}
                                 onChange={() => handleToggleTask(task.id)}
-                                className="h-5 w-5 rounded border-gray-300 text-green-500 focus:ring-green-500 cursor-pointer"
+                                className="h-5 w-5 rounded border-gray-300 text-[#ED3F27] focus:ring-[#ED3F27] cursor-pointer"
                             />
-                            <span className={`flex-grow mx-4 ${task.completed ? 'line-through text-zinc-500' : 'text-zinc-200'}`}>
+                            <span className={`flex-grow mx-4 ${task.completed ? 'line-through text-[#134686]/50' : 'text-[#134686]'}`}>
                                 {task.text}
                             </span>
-                            <button onClick={() => handleDeleteTask(task.id)} className="text-zinc-500 hover:text-red-500 transition">
+                            <button onClick={() => handleDeleteTask(task.id)} className="text-[#134686]/50 hover:text-[#ED3F27] transition">
                                 &times;
                             </button>
                         </li>

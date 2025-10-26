@@ -12,7 +12,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, toggleTheme }) => {
     <button
       onClick={toggleTheme}
       className={`w-14 h-8 rounded-full p-1 flex items-center transition-colors duration-300 ${
-        theme === Theme.Calm ? 'bg-blue-300' : 'bg-gray-700'
+        theme === Theme.Calm ? 'bg-[#FEB21A]' : 'bg-[#134686]'
       }`}
     >
       <div

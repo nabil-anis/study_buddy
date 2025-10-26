@@ -46,8 +46,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userProfile }) => {
           onClick={() => handleNavClick(module)}
           className={`flex items-center w-full p-3 rounded-lg transition-colors duration-200 ${
               activeModule === module 
-              ? 'bg-blue-600 text-white shadow-lg' 
-              : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
+              ? 'bg-[#134686] text-white shadow-lg' 
+              : 'text-[#134686]/70 hover:bg-[#134686]/10 hover:text-[#134686]'
           }`}
       >
           {icon}
@@ -56,11 +56,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userProfile }) => {
   );
 
   return (
-    <div className="flex h-screen bg-zinc-950 text-zinc-100 overflow-hidden">
+    <div className="flex h-screen bg-transparent text-[#134686]">
         {/* Sidebar */}
-        <aside className={`absolute md:relative inset-y-0 left-0 z-30 w-72 flex-shrink-0 p-6 flex flex-col gap-8 bg-zinc-900 border-r border-zinc-800 transform transition-transform duration-300 ease-in-out md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <aside className={`absolute md:relative inset-y-0 left-0 z-30 w-72 flex-shrink-0 p-6 flex flex-col gap-8 bg-white/40 backdrop-blur-md border-r border-white/60 transform transition-transform duration-300 ease-in-out md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
             <div className="flex items-center gap-3">
-               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-teal-400 rounded-lg flex items-center justify-center font-bold text-lg">SB</div>
+               <div className="w-10 h-10 bg-gradient-to-br from-[#134686] to-[#ED3F27] rounded-lg flex items-center justify-center font-bold text-lg text-white">SB</div>
                <h1 className="text-xl font-bold">Study Buddy</h1>
             </div>
             
@@ -81,30 +81,28 @@ const Dashboard: React.FC<DashboardProps> = ({ userProfile }) => {
         {/* Overlay for mobile */}
         {isSidebarOpen && (
             <div
-                className="fixed inset-0 bg-black/60 z-20 md:hidden"
+                className="fixed inset-0 bg-black/40 z-20 md:hidden"
                 onClick={() => setIsSidebarOpen(false)}
             ></div>
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
-            <header className="mb-8 flex justify-between items-center">
+        <main className="flex-1 p-4 md:p-6 lg:p-10 overflow-y-auto min-w-0">
+            <header className="mb-6 md:mb-8 flex justify-between items-center">
               <div>
-                <h1 className="text-3xl sm:text-4xl font-bold text-zinc-100">Welcome back, {userProfile.name.split(' ')[0]}!</h1>
-                <p className="text-zinc-400 mt-1">Ready to make your brain bigger?</p>
+                <h1 className="text-3xl sm:text-4xl font-bold text-[#134686]">Welcome back, {userProfile.name.split(' ')[0]}!</h1>
+                <p className="text-[#134686]/70 mt-1 text-sm sm:text-base">Ready to make your brain bigger?</p>
               </div>
               <button 
                 onClick={() => setIsSidebarOpen(true)}
-                className="md:hidden p-2 rounded-lg text-zinc-400 hover:bg-zinc-800"
+                className="md:hidden p-2 rounded-lg text-[#134686]/70 hover:bg-[#134686]/10"
                 aria-label="Open menu"
               >
                   <MenuIcon className="w-6 h-6" />
               </button>
             </header>
             
-            <div className="h-[calc(100%-120px)]">
-                {renderModule()}
-            </div>
+            {renderModule()}
         </main>
     </div>
   );

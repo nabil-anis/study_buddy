@@ -15,27 +15,27 @@ const data = [
 const StudyChart: React.FC = () => {
   return (
     <Card className="!p-4">
-      <h3 className="text-md font-bold mb-4 px-2 text-zinc-200">Weekly Progress</h3>
+      <h3 className="text-md font-bold mb-4 px-2 text-[#134686]">Weekly Progress</h3>
       <div className="w-full h-48">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-            <XAxis dataKey="name" tick={{ fill: '#a1a1aa', fontSize: 12 }} />
-            <YAxis yAxisId="left" orientation="left" stroke="#a1a1aa" tick={{ fill: '#a1a1aa', fontSize: 12 }} />
-            <YAxis yAxisId="right" orientation="right" stroke="#a1a1aa" tick={{ fill: '#a1a1aa', fontSize: 12 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(19, 70, 134, 0.2)" />
+            <XAxis dataKey="name" tick={{ fill: '#134686', fontSize: 12 }} stroke="rgba(19, 70, 134, 0.4)" />
+            <YAxis yAxisId="left" orientation="left" stroke="rgba(19, 70, 134, 0.4)" tick={{ fill: '#134686', fontSize: 12 }} />
+            <YAxis yAxisId="right" orientation="right" stroke="rgba(19, 70, 134, 0.4)" tick={{ fill: '#134686', fontSize: 12 }} />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'rgba(9, 9, 11, 0.9)',
-                border: '1px solid #3f3f46',
+                backgroundColor: 'rgba(217, 233, 207, 0.9)',
+                border: '1px solid rgba(19, 70, 134, 0.3)',
                 borderRadius: '0.5rem',
-                color: '#f4f4f5',
+                color: '#134686',
               }}
               labelStyle={{ fontWeight: 'bold' }}
-              cursor={{fill: '#27272a'}}
+              cursor={{fill: 'rgba(19, 70, 134, 0.1)'}}
             />
-            <Legend wrapperStyle={{fontSize: "12px", color: "#a1a1aa"}}/>
-            <Bar yAxisId="left" dataKey="Study Time (hrs)" fill="#3b82f6" />
-            <Bar yAxisId="right" dataKey="Progress (%)" fill="#14b8a6" />
+            <Legend wrapperStyle={{fontSize: "12px", color: "#134686"}}/>
+            <Bar yAxisId="left" dataKey="Study Time (hrs)" fill="#134686" />
+            <Bar yAxisId="right" dataKey="Progress (%)" fill="#FEB21A" />
           </BarChart>
         </ResponsiveContainer>
       </div>

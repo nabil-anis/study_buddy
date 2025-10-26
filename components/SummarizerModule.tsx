@@ -53,16 +53,16 @@ const SummarizerModule: React.FC = () => {
     return (
         <Card className="h-full flex flex-col">
             <div className="flex items-center mb-4">
-                <SparklesIcon className="w-8 h-8 text-yellow-400 mr-3" />
-                <h2 className="text-2xl font-bold text-zinc-100">AI Summarizer</h2>
+                <SparklesIcon className="w-8 h-8 text-[#ED3F27] mr-3" />
+                <h2 className="text-2xl font-bold text-[#134686]">AI Summarizer</h2>
             </div>
-            <p className="text-zinc-400 mb-6">Paste your notes, or upload a document, and our AI will whip up a summary faster than you can say "procrastination."</p>
+            <p className="text-[#134686]/80 mb-6">Paste your notes, or upload a document, and our AI will whip up a summary faster than you can say "procrastination."</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow">
                 <div className="flex flex-col">
                     <div className="flex justify-between items-center mb-2">
-                        <h3 className="font-semibold text-zinc-300">Your Text</h3>
-                        <label htmlFor="file-upload-summarizer" className="cursor-pointer flex items-center gap-2 text-sm text-yellow-400 hover:text-yellow-300 transition">
+                        <h3 className="font-semibold text-[#134686]/90">Your Text</h3>
+                        <label htmlFor="file-upload-summarizer" className="cursor-pointer flex items-center gap-2 text-sm text-[#ED3F27] hover:text-[#ED3F27]/80 transition">
                             <UploadIcon className="w-4 h-4" />
                             <span className="truncate max-w-[200px]">{fileName || 'Upload File'}</span>
                         </label>
@@ -72,19 +72,19 @@ const SummarizerModule: React.FC = () => {
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder={isParsing ? "Reading your document..." : "Paste your long, boring text here, or upload a file above."}
-                        className="w-full flex-grow p-4 bg-zinc-800/50 text-zinc-200 rounded-lg border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none"
+                        className="w-full flex-grow p-4 bg-white/50 text-[#134686] rounded-lg border border-[#134686]/20 placeholder:text-[#134686]/60 focus:outline-none focus:ring-2 focus:ring-[#ED3F27] resize-none"
                         disabled={isProcessing}
                     />
                 </div>
                 <div className="flex flex-col">
-                    <h3 className="font-semibold mb-2 text-zinc-300">Summary</h3>
-                    <div className="w-full flex-grow p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 overflow-y-auto">
+                    <h3 className="font-semibold mb-2 text-[#134686]/90">Summary</h3>
+                    <div className="w-full flex-grow p-4 bg-white/50 rounded-lg border border-[#134686]/20 overflow-y-auto">
                         {isLoading ? (
-                            <div className="flex items-center justify-center h-full text-zinc-400">
+                            <div className="flex items-center justify-center h-full text-[#134686]/70">
                                 <p>Condensing knowledge...</p>
                             </div>
                         ) : (
-                            summary ? <p className="text-zinc-200 whitespace-pre-wrap">{summary}</p> : <p className="text-zinc-500">Your summary will appear here.</p>
+                            summary ? <p className="text-[#134686] whitespace-pre-wrap">{summary}</p> : <p className="text-[#134686]/60">Your summary will appear here.</p>
                         )}
                     </div>
                 </div>
@@ -94,7 +94,7 @@ const SummarizerModule: React.FC = () => {
                 <button 
                     onClick={handleSummarize}
                     disabled={isProcessing || !inputText}
-                    className="px-8 py-3 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-transform transform hover:scale-105 shadow-lg disabled:bg-yellow-400 disabled:cursor-not-allowed disabled:transform-none"
+                    className="px-8 py-3 bg-[#ED3F27] text-white font-bold rounded-lg hover:bg-[#ED3F27]/90 transition-transform transform hover:scale-105 shadow-lg disabled:bg-[#ED3F27]/60 disabled:cursor-not-allowed disabled:transform-none"
                 >
                     {isLoading ? 'Thinking Hard...' : isParsing ? 'Reading File...' : 'Summarize'}
                 </button>

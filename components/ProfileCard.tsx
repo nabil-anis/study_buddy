@@ -8,10 +8,10 @@ interface ProfileCardProps {
 const ProfileCard: React.FC<ProfileCardProps> = ({ userProfile }) => {
   return (
       <div className="flex items-center gap-4">
-        <img src={userProfile.photo} alt={userProfile.name} className="w-12 h-12 rounded-full object-cover border-2 border-zinc-700" />
+        <img src={userProfile.photo} alt={userProfile.name} className="w-12 h-12 rounded-full object-cover border-2 border-[#134686]/20" />
         <div>
-          <h3 className="text-md font-bold text-zinc-100">{userProfile.name}</h3>
-          <p className="text-sm text-zinc-400">{userProfile.email}</p>
+          <h3 className="text-md font-bold text-[#134686]">{userProfile.name}</h3>
+          <p className="text-sm text-[#134686]/70">{userProfile.email}</p>
         </div>
       </div>
   );
