@@ -115,14 +115,5 @@ export const useVoice = () => {
         }
     }, [isListening]);
 
-    const speak = useCallback((text: string) => {
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            window.speechSynthesis.speak(utterance);
-        } else {
-            console.warn("Speech synthesis not supported in this browser.");
-        }
-    }, []);
-
-    return { isListening, transcript, startListening, stopListening, speak };
+    return { isListening, transcript, startListening, stopListening };
 };

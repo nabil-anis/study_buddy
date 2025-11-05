@@ -6,8 +6,8 @@ export enum AppState {
 
 export interface UserProfile {
   name: string;
-  age: string;
-  email: string;
+  age?: string;
+  email?: string;
   photo: string;
 }
 

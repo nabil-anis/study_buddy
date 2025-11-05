@@ -51,18 +51,18 @@ const SummarizerModule: React.FC = () => {
     const isProcessing = isLoading || isParsing;
 
     return (
-        <Card className="h-full flex flex-col">
+        <Card className="h-full flex flex-col p-4 sm:p-6">
             <div className="flex items-center mb-4">
-                <SparklesIcon className="w-8 h-8 text-[#ED3F27] mr-3" />
-                <h2 className="text-2xl font-bold text-[#134686]">AI Summarizer</h2>
+                <SparklesIcon className="w-8 h-8 text-[var(--accent)] mr-3" />
+                <h2 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">AI Summarizer</h2>
             </div>
-            <p className="text-[#134686]/80 mb-6">Paste your notes, or upload a document, and our AI will whip up a summary faster than you can say "procrastination."</p>
+            <p className="text-[var(--foreground-muted)] mb-6">Paste your notes or upload a document. The AI will whip up a summary faster than you can say "procrastination."</p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow min-h-[300px]">
                 <div className="flex flex-col">
                     <div className="flex justify-between items-center mb-2">
-                        <h3 className="font-semibold text-[#134686]/90">Your Text</h3>
-                        <label htmlFor="file-upload-summarizer" className="cursor-pointer flex items-center gap-2 text-sm text-[#ED3F27] hover:text-[#ED3F27]/80 transition">
+                        <h3 className="font-semibold text-[var(--foreground)]/90">Your Text</h3>
+                        <label htmlFor="file-upload-summarizer" className="cursor-pointer flex items-center gap-2 text-sm text-[var(--accent)] hover:opacity-80 transition">
                             <UploadIcon className="w-4 h-4" />
                             <span className="truncate max-w-[200px]">{fileName || 'Upload File'}</span>
                         </label>
@@ -71,20 +71,21 @@ const SummarizerModule: React.FC = () => {
                     <textarea 
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
-                        placeholder={isParsing ? "Reading your document..." : "Paste your long, boring text here, or upload a file above."}
-                        className="w-full flex-grow p-4 bg-white/50 text-[#134686] rounded-lg border border-[#134686]/20 placeholder:text-[#134686]/60 focus:outline-none focus:ring-2 focus:ring-[#ED3F27] resize-none"
+                        placeholder={isParsing ? "Reading your document..." : "Paste your long, boring text here, or upload a file."}
+                        className="w-full flex-grow p-4 bg-[var(--input-bg)] text-[var(--foreground)] rounded-lg border border-[var(--input-border)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] resize-none"
                         disabled={isProcessing}
                     />
                 </div>
                 <div className="flex flex-col">
-                    <h3 className="font-semibold mb-2 text-[#134686]/90">Summary</h3>
-                    <div className="w-full flex-grow p-4 bg-white/50 rounded-lg border border-[#134686]/20 overflow-y-auto">
+                    <h3 className="font-semibold mb-2 text-[var(--foreground)]/90">Summary</h3>
+                    <div className="w-full flex-grow p-4 bg-[var(--primary)]/5 rounded-lg border border-[var(--input-border)] overflow-y-auto">
                         {isLoading ? (
-                            <div className="flex items-center justify-center h-full text-[#134686]/70">
-                                <p>Condensing knowledge...</p>
+                            <div className="flex items-center justify-center h-full text-[var(--foreground-muted)]">
+                                <div className="loader !border-[var(--accent)] !border-b-transparent"></div>
+                                <p className="ml-3">Summarizing...</p>
                             </div>
                         ) : (
-                            summary ? <p className="text-[#134686] whitespace-pre-wrap">{summary}</p> : <p className="text-[#134686]/60">Your summary will appear here.</p>
+                            summary ? <p className="text-[var(--foreground)] whitespace-pre-wrap">{summary}</p> : <p className="text-[var(--foreground-muted)]">Your summary will appear here.</p>
                         )}
                     </div>
                 </div>
@@ -94,9 +95,9 @@ const SummarizerModule: React.FC = () => {
                 <button 
                     onClick={handleSummarize}
                     disabled={isProcessing || !inputText}
-                    className="px-8 py-3 bg-[#ED3F27] text-white font-bold rounded-lg hover:bg-[#ED3F27]/90 transition-transform transform hover:scale-105 shadow-lg disabled:bg-[#ED3F27]/60 disabled:cursor-not-allowed disabled:transform-none"
+                    className="px-8 py-3 bg-[var(--accent)] text-[var(--accent-foreground)] font-bold rounded-lg hover:bg-opacity-90 transition-transform transform hover:scale-105 shadow-lg disabled:bg-opacity-60 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3 mx-auto"
                 >
-                    {isLoading ? 'Thinking Hard...' : isParsing ? 'Reading File...' : 'Summarize'}
+                    {isLoading ? <><div className="loader !w-6 !h-6 !border-[var(--accent-foreground)] !border-b-transparent"></div><span>Processing...</span></> : 'Summarize'}
                 </button>
             </div>
         </Card>

@@ -39,25 +39,18 @@ const PlannerModule: React.FC = () => {
             task.id === id ? { ...task, completed: !task.completed } : task
         ));
     };
-    
-    const handleAddTask = (text: string) => {
-      if (!text.trim()) return;
-      const newTask: Task = { id: nextId, text, completed: false };
-      setTasks([...tasks, newTask]);
-      setNextId(nextId + 1);
-    }
 
     const handleDeleteTask = (id: number) => {
         setTasks(tasks.filter(task => task.id !== id));
     };
 
     return (
-        <Card className="h-full flex flex-col">
+        <Card className="h-full flex flex-col p-4 sm:p-6">
             <div className="flex items-center mb-4">
-                <PlannerIcon className="w-8 h-8 text-[#ED3F27] mr-3" />
-                <h2 className="text-2xl font-bold text-[#134686]">AI Study Planner</h2>
+                <PlannerIcon className="w-8 h-8 text-[var(--accent)] mr-3" />
+                <h2 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">AI Study Planner</h2>
             </div>
-            <p className="text-[#134686]/80 mb-6">Tell the AI your study goal, and it will generate a step-by-step plan for you.</p>
+            <p className="text-[var(--foreground-muted)] mb-6">Tell the AI your study goal, and it will generate a step-by-step plan for you.</p>
 
             <div className="flex items-center gap-2 mb-6">
                 <input
@@ -66,34 +59,40 @@ const PlannerModule: React.FC = () => {
                     onChange={(e) => setGoal(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleGeneratePlan()}
                     placeholder="e.g., 'Ace my history final next week'"
-                    className="flex-grow px-4 py-3 bg-white/50 rounded-full border border-[#134686]/20 placeholder:text-[#134686]/60 focus:outline-none focus:ring-2 focus:ring-[#ED3F27] text-[#134686]"
+                    className="flex-grow px-4 py-3 bg-[var(--input-bg)] rounded-full border border-[var(--input-border)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] text-[var(--foreground)]"
                     disabled={isLoading}
                 />
-                <button onClick={handleGeneratePlan} disabled={isLoading} className="p-3 rounded-full bg-[#ED3F27] text-white hover:bg-[#ED3F27]/90 disabled:bg-[#ED3F27]/60 transition">
-                    <SendIcon className="w-6 h-6" />
+                <button onClick={handleGeneratePlan} disabled={isLoading} className="p-3 rounded-full bg-[var(--accent)] text-[var(--accent-foreground)] hover:bg-opacity-90 disabled:bg-opacity-60 transition-transform transform enabled:hover:scale-110">
+                    {isLoading ? <div className="loader !w-6 !h-6 !border-[var(--accent-foreground)] !border-b-transparent"></div> : <SendIcon className="w-6 h-6" />}
                 </button>
             </div>
             
-            <div className="flex-grow overflow-y-auto pr-2">
-                {isLoading && tasks.length === 0 && <p className="text-[#134686]/70 text-center">Generating your master plan...</p>}
-                {tasks.length === 0 && !isLoading && <p className="text-[#134686]/60 text-center pt-8">Your study plan will appear here.</p>}
+            <div className="flex-grow overflow-y-auto pr-2 -mr-4">
+                {tasks.length === 0 && !isLoading && <p className="text-[var(--foreground-muted)] text-center pt-8">Your generated study plan will appear here.</p>}
                 <ul className="space-y-3">
                     {tasks.map(task => (
-                        <li key={task.id} className="flex items-center bg-white/60 p-3 rounded-lg">
+                        <li key={task.id} className="flex items-center bg-[var(--input-bg)] p-3 rounded-lg border border-[var(--input-border)] transition-colors group">
                             <input 
                                 type="checkbox"
+                                id={`task-${task.id}`}
                                 checked={task.completed}
                                 onChange={() => handleToggleTask(task.id)}
-                                className="h-5 w-5 rounded border-gray-300 text-[#ED3F27] focus:ring-[#ED3F27] cursor-pointer"
+                                className="h-5 w-5 rounded border-gray-300 text-[var(--accent)] focus:ring-[var(--accent)] cursor-pointer bg-transparent"
                             />
-                            <span className={`flex-grow mx-4 ${task.completed ? 'line-through text-[#134686]/50' : 'text-[#134686]'}`}>
+                            <label htmlFor={`task-${task.id}`} className={`flex-grow mx-4 cursor-pointer ${task.completed ? 'line-through text-[var(--foreground-muted)]' : 'text-[var(--foreground)]'}`}>
                                 {task.text}
-                            </span>
-                            <button onClick={() => handleDeleteTask(task.id)} className="text-[#134686]/50 hover:text-[#ED3F27] transition">
+                            </label>
+                            <button onClick={() => handleDeleteTask(task.id)} className="text-[var(--foreground-muted)] hover:text-[var(--accent)] transition-colors text-xl font-bold opacity-0 group-hover:opacity-100">
                                 &times;
                             </button>
                         </li>
                     ))}
+                     {isLoading && (
+                      <li className="flex justify-center items-center p-4">
+                        <div className="loader !border-[var(--accent)] !border-b-transparent"></div>
+                        <span className="ml-3 text-[var(--foreground-muted)]">Generating plan...</span>
+                      </li>
+                    )}
                 </ul>
             </div>
         </Card>

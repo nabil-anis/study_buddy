@@ -11,3 +11,6 @@ export * from './ChevronRightIcon';
 export * from './PlannerIcon';
 export * from './UploadIcon';
 export * from './MenuIcon';
+export * from './LightbulbIcon';
+export * from './SunIcon';
+export * from './MoonIcon';

@@ -1,7 +1,5 @@
 {
-  "name": "Study Buddy",
+  "name": "Copy of Study Buddy",
   "description": "Your AI-powered study companion. Generate quizzes, flashcards, and summaries from your notes or uploaded documents (PDF, DOCX, etc.). Plan your study sessions with the AI Planner. Your brain's new best friend.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
+  "requestFramePermissions": []
 }

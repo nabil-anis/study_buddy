@@ -98,12 +98,17 @@ export const summarizeText = async (text: string): Promise<string> => {
   }
 };
 
-export const generateQuiz = async (topic: string, count: number, context?: string): Promise<QuizQuestion[]> => {
+export const generateQuiz = async (topic: string, count: number, difficulty: 'Easy' | 'Moderate' | 'Hard', context?: string, existingQuestions: QuizQuestion[] = []): Promise<QuizQuestion[]> => {
   try {
-    const prompt = buildPrompt(
-      `Generate a JSON array of ${count} multiple-choice quiz questions about "${topic}". Each question should be an object with three properties: "question" (string), "options" (an array of 4 strings), and "correctAnswer" (a string that is one of the options).`,
-      context
-    );
+    let baseInstruction = `Generate a JSON array of ${count} new and unique multiple-choice quiz questions of ${difficulty} difficulty about "${topic}". Each question should be an object with three properties: "question" (string), "options" (an array of 4 strings), and "correctAnswer" (a string that is one of the options).`;
+    
+    if (existingQuestions.length > 0) {
+      const existingQuestionStrings = existingQuestions.map(q => `- "${q.question}"`).join('\n');
+      const truncatedExisting = existingQuestionStrings.length > 3000 ? existingQuestionStrings.substring(0, 3000) + '...' : existingQuestionStrings;
+      baseInstruction += `\n\nIMPORTANT: Ensure the new questions are different from the ones already asked. Do NOT repeat any of the following questions:\n${truncatedExisting}`;
+    }
+
+    const prompt = buildPrompt(baseInstruction, context);
     
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -203,5 +208,19 @@ export const generateStudyPlan = async (goal: string): Promise<string[]> => {
     } catch (error) {
         console.error("Gemini API error in generateStudyPlan:", error);
         throw new Error("Failed to generate a study plan.");
+    }
+};
+
+export const getStudyTip = async (): Promise<string> => {
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: "Generate a short, upbeat, one-sentence motivational study tip for a student. Keep it under 15 words and don't use quotation marks.",
+        });
+        return response.text;
+    } catch (error) {
+        console.error("Gemini API error in getStudyTip:", error);
+        // Return a fallback tip on error
+        return "Keep going, you're doing great!";
     }
 };

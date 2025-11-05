@@ -10,12 +10,65 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+      :root {
+        --background: #F9F9F9;
+        --foreground: #1F2937;
+        --foreground-muted: #6B7280;
+        --card-bg: rgba(255, 255, 255, 0.6);
+        --card-border: rgba(31, 41, 55, 0.1);
+        --primary: #7C3AED;
+        --primary-foreground: #ffffff;
+        --secondary: #F59E0B;
+        --secondary-foreground: #1F2937;
+        --accent: #EC4899;
+        --accent-foreground: #ffffff;
+        --input-bg: rgba(255, 255, 255, 0.7);
+        --input-border: rgba(31, 41, 55, 0.15);
+        --aurora-gradient: radial-gradient(circle, rgba(124, 58, 237, 0.15), rgba(236, 72, 153, 0.1), rgba(245, 158, 11, 0.1));
+      }
+
+      .dark {
+        --background: #101010;
+        --foreground: #E5E7EB;
+        --foreground-muted: #9CA3AF;
+        --card-bg: rgba(28, 28, 28, 0.5);
+        --card-border: rgba(255, 255, 255, 0.1);
+        --primary: #8B5CF6;
+        --primary-foreground: #ffffff;
+        --secondary: #2DD4BF;
+        --secondary-foreground: #101010;
+        --accent: #F472B6;
+        --accent-foreground: #ffffff;
+        --input-bg: rgba(38, 38, 38, 0.5);
+        --input-border: rgba(255, 255, 255, 0.15);
+        --aurora-gradient: radial-gradient(circle, rgba(139, 92, 246, 0.15), rgba(244, 114, 182, 0.1), rgba(45, 212, 191, 0.1));
+      }
+
+      @keyframes gradient-animation {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 150vmax;
+        height: 150vmax;
+        z-index: -1;
+        opacity: 0.3;
+        background: var(--aurora-gradient);
+        animation: gradient-animation 60s ease-in-out infinite;
+        transition: background 0.5s ease;
+      }
+
       body {
         position: relative;
         min-height: 100vh;
         font-family: 'Inter', sans-serif;
-        background-color: #D9E9CF;
-        color: #134686;
+        background-color: var(--background);
+        color: var(--foreground);
+        transition: background-color 0.3s ease, color 0.3s ease;
       }
       .flip-card {
         transform-style: preserve-3d;
@@ -35,16 +88,68 @@
         width: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: rgba(19, 70, 134, 0.1);
+        background: rgba(0, 0, 0, 0.1);
         border-radius: 10px;
+      }
+      .dark ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
       }
       ::-webkit-scrollbar-thumb {
-        background: rgba(19, 70, 134, 0.4);
+        background: rgba(0, 0, 0, 0.3);
         border-radius: 10px;
       }
-      ::-webkit-scrollbar-thumb:hover {
-        background: rgba(19, 70, 134, 0.6);
+      .dark ::-webkit-scrollbar-thumb {
+         background: rgba(255, 255, 255, 0.3);
       }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.5);
+      }
+      .dark ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      /* Spinner for loading states */
+      .loader {
+        width: 1.5rem;
+        height: 1.5rem;
+        border: 3px solid var(--primary);
+        border-bottom-color: transparent;
+        border-radius: 50%;
+        display: inline-block;
+        box-sizing: border-box;
+        animation: rotation 1s linear infinite;
+      }
+      
+      @keyframes rotation {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      /* Additional animation classes */
+      @keyframes fade-in-down {
+        0% { opacity: 0; transform: translateY(-20px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in-down {
+        animation: fade-in-down 0.6s ease-out forwards;
+      }
+
+      @keyframes fade-in-up {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in-up {
+        animation: fade-in-up 0.6s ease-out forwards;
+      }
+      
+      @keyframes fade-in {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+      }
+      .animate-fade-in {
+         animation: fade-in 0.5s ease-in-out forwards;
+      }
+
     </style>
   <script type="importmap">
 {
@@ -52,6 +157,7 @@
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0",
+    "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.45.0",
     "recharts": "https://aistudiocdn.com/recharts@^3.3.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "pdfjs-dist": "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.5.136/build/pdf.min.mjs",
@@ -65,7 +171,10 @@
     <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script type="module" src="/index.tsx"></script>
-    <!-- anchored signature -->
-    <span class="absolute right-4 bottom-2 text-gray-400 text-xs italic">By nbl.</span>
+    <div class="fixed bottom-4 right-6 text-xs z-50">
+      <a href="https://github.com/nbl-byte" target="_blank" rel="noopener noreferrer" class="text-[var(--foreground-muted)] hover:text-[var(--primary)] transition-colors" style="text-decoration: none;">
+        By nbl.
+      </a>
+    </div>
   </body>
 </html>

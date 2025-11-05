@@ -1,18 +1,31 @@
-import React, { useState, useCallback } from 'react';
-import { AppState, UserProfile } from './types';
+
+import React, { useState, useCallback, useEffect } from 'react';
+import { AppState, UserProfile, Theme } from './types';
 import LandingPage from './components/LandingPage';
-import Onboarding from './components/Onboarding';
 import Dashboard from './components/Dashboard';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.Landing);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [theme, setTheme] = useState<Theme>(Theme.Calm);
 
-  const handleLogin = useCallback(() => {
-    setAppState(AppState.Onboarding);
+  const toggleTheme = useCallback(() => {
+    setTheme(prevTheme => prevTheme === Theme.Calm ? Theme.Focus : Theme.Calm);
   }, []);
 
-  const handleOnboardingComplete = useCallback((profile: UserProfile) => {
+  useEffect(() => {
+    if (theme === Theme.Focus) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
+
+  const handleLogin = useCallback((name: string) => {
+    const profile: UserProfile = {
+      name,
+      photo: `https://picsum.photos/seed/${name}/200`,
+    };
     setUserProfile(profile);
     setAppState(AppState.Dashboard);
   }, []);
@@ -21,10 +34,8 @@ const App: React.FC = () => {
     switch (appState) {
       case AppState.Landing:
         return <LandingPage onLogin={handleLogin} />;
-      case AppState.Onboarding:
-        return <Onboarding onComplete={handleOnboardingComplete} />;
       case AppState.Dashboard:
-        return userProfile ? <Dashboard userProfile={userProfile} /> : <LandingPage onLogin={handleLogin} />;
+        return userProfile ? <Dashboard userProfile={userProfile} theme={theme} toggleTheme={toggleTheme} /> : <LandingPage onLogin={handleLogin} />;
       default:
         return <LandingPage onLogin={handleLogin} />;
     }
