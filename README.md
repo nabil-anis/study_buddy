@@ -63,7 +63,7 @@ Group study rooms
 
 🧍‍♂️ About the Creator
 
-Built by Muhammad Nabil Anis
+Built by Nabil Anis
  — a CS undergrad, caffeine enthusiast, and believer that studying shouldn’t feel like punishment.
 
 ☕ Contributing
