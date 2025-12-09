@@ -75,8 +75,3 @@ Every line of code brings humanity closer to passing finals.
 ⚡ License
 
 Licensed under the MIT License.
-
-
----
-
-Would you like me to add **badges** at the top (for _Vite_, _React_, _MIT License_, etc.) to give it that polished open
