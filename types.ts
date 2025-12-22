@@ -5,6 +5,7 @@ export enum AppState {
 }
 
 export interface UserProfile {
+  id?: string;
   name: string;
   age?: string;
   email?: string;
@@ -23,12 +24,20 @@ export interface Flashcard {
 }
 
 export interface Task {
-  id: number;
+  id: string | number;
+  user_id?: string;
   text: string;
   completed: boolean;
+  created_at?: string;
 }
 
-// FIX: Add Theme enum to resolve import error in ThemeToggle.tsx.
+export interface SavedNote {
+  id: string;
+  user_id: string;
+  content: string;
+  updated_at: string;
+}
+
 export enum Theme {
   Calm,
   Focus,

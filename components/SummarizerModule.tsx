@@ -1,9 +1,16 @@
+
 import React, { useState, ChangeEvent } from 'react';
 import Card from './GlassCard';
 import { summarizeText, parseFileContent } from '../services/geminiService';
 import { SparklesIcon, UploadIcon } from './icons';
+import { supabase } from '../services/supabaseClient';
+import { UserProfile } from '../types';
 
-const SummarizerModule: React.FC = () => {
+interface SummarizerModuleProps {
+    userProfile?: UserProfile;
+}
+
+const SummarizerModule: React.FC<SummarizerModuleProps> = ({ userProfile }) => {
     const [inputText, setInputText] = useState('');
     const [summary, setSummary] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +39,7 @@ const SummarizerModule: React.FC = () => {
 
     const handleSummarize = async () => {
         if (!inputText.trim()) {
-            alert("You need to give me something to summarize. I'm smart, but not a mind reader.");
+            alert("You need to give me something to summarize.");
             return;
         }
         setIsLoading(true);
@@ -40,9 +47,17 @@ const SummarizerModule: React.FC = () => {
         try {
             const result = await summarizeText(inputText);
             setSummary(result);
+            
+            // Save to Supabase
+            if (supabase && userProfile?.id) {
+                await supabase.from('summaries').insert([{
+                    user_id: userProfile.id,
+                    topic: fileName || inputText.substring(0, 50),
+                    content: result
+                }]);
+            }
         } catch (error) {
             console.error("Error summarizing text:", error);
-            alert("The AI is struggling to condense your text. Maybe it's already perfect? Or try again.");
         } finally {
             setIsLoading(false);
         }
@@ -56,7 +71,7 @@ const SummarizerModule: React.FC = () => {
                 <SparklesIcon className="w-8 h-8 text-[var(--accent)] mr-3" />
                 <h2 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">AI Summarizer</h2>
             </div>
-            <p className="text-[var(--foreground-muted)] mb-6">Paste your notes or upload a document. The AI will whip up a summary faster than you can say "procrastination."</p>
+            <p className="text-[var(--foreground-muted)] mb-6">Paste notes or upload a doc. The AI will save the summary to your profile.</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow min-h-[300px]">
                 <div className="flex flex-col">
@@ -71,7 +86,7 @@ const SummarizerModule: React.FC = () => {
                     <textarea 
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
-                        placeholder={isParsing ? "Reading your document..." : "Paste your long, boring text here, or upload a file."}
+                        placeholder={isParsing ? "Reading your document..." : "Paste your text here."}
                         className="w-full flex-grow p-4 bg-[var(--input-bg)] text-[var(--foreground)] rounded-lg border border-[var(--input-border)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] resize-none"
                         disabled={isProcessing}
                     />
@@ -85,7 +100,7 @@ const SummarizerModule: React.FC = () => {
                                 <p className="ml-3">Summarizing...</p>
                             </div>
                         ) : (
-                            summary ? <p className="text-[var(--foreground)] whitespace-pre-wrap">{summary}</p> : <p className="text-[var(--foreground-muted)]">Your summary will appear here.</p>
+                            summary ? <p className="text-[var(--foreground)] whitespace-pre-wrap">{summary}</p> : <p className="text-[var(--foreground-muted)]">Generated summary will be auto-saved.</p>
                         )}
                     </div>
                 </div>
@@ -95,9 +110,9 @@ const SummarizerModule: React.FC = () => {
                 <button 
                     onClick={handleSummarize}
                     disabled={isProcessing || !inputText}
-                    className="px-8 py-3 bg-[var(--accent)] text-[var(--accent-foreground)] font-bold rounded-lg hover:bg-opacity-90 transition-transform transform hover:scale-105 shadow-lg disabled:bg-opacity-60 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3 mx-auto"
+                    className="px-8 py-3 bg-[var(--accent)] text-[var(--accent-foreground)] font-bold rounded-lg hover:bg-opacity-90 transition-transform transform hover:scale-105 shadow-lg flex items-center justify-center gap-3 mx-auto"
                 >
-                    {isLoading ? <><div className="loader !w-6 !h-6 !border-[var(--accent-foreground)] !border-b-transparent"></div><span>Processing...</span></> : 'Summarize'}
+                    {isLoading ? 'Processing...' : 'Summarize & Save'}
                 </button>
             </div>
         </Card>

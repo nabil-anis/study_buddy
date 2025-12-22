@@ -1,17 +1,11 @@
+import { createClient } from '@supabase/supabase-js'
 
-// import { createClient } from '@supabase/supabase-js'
+// Using provided Supabase credentials
+const supabaseUrl = 'https://ohhvlavljhftshlbzqbc.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oaHZsYXZsamhmdHNobGJ6cWJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYzNjk0OTgsImV4cCI6MjA4MTk0NTQ5OH0.dlVlqLSRItUiRO8xMS7c6gTBeV-zn-uzeWnCyKvtL6E';
 
-// // The execution environment provides environment variables via `process.env`.
-// // This matches the pattern used for the Gemini API Key in other parts of the app.
-// const supabaseUrl = process.env.VITE_SUPABASE_URL
-// const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY
+if (!supabaseUrl || !supabaseKey) {
+  console.warn("Supabase credentials missing. Data persistence will be disabled.");
+}
 
-// if (!supabaseUrl || !supabaseKey) {
-//   // This error will be thrown if the environment variables are not set.
-//   throw new Error("Supabase credentials missing. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your project's Environment Variables.")
-// }
-
-// export const supabase = createClient(supabaseUrl, supabaseKey)
-
-// Supabase has been disabled as per the user's request.
-export const supabase = null;
+export const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supabaseKey) : null;

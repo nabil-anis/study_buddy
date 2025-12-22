@@ -1,14 +1,35 @@
-import React, { useState } from 'react';
-import { Task } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Task, UserProfile } from '../types';
 import { generateStudyPlan } from '../services/geminiService';
+import { supabase } from '../services/supabaseClient';
 import Card from './GlassCard';
 import { PlannerIcon, SendIcon } from './icons';
 
-const PlannerModule: React.FC = () => {
+interface PlannerModuleProps {
+    userProfile: UserProfile;
+}
+
+const PlannerModule: React.FC<PlannerModuleProps> = ({ userProfile }) => {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [goal, setGoal] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [nextId, setNextId] = useState(1);
+
+    useEffect(() => {
+        fetchTasks();
+    }, [userProfile.id]);
+
+    const fetchTasks = async () => {
+        if (!supabase || !userProfile.id) return;
+        const { data, error } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('user_id', userProfile.id)
+            .order('created_at', { ascending: false });
+        
+        if (!error && data) {
+            setTasks(data);
+        }
+    };
 
     const handleGeneratePlan = async () => {
         if (!goal.trim()) {
@@ -18,13 +39,31 @@ const PlannerModule: React.FC = () => {
         setIsLoading(true);
         try {
             const taskTexts = await generateStudyPlan(goal);
-            const newTasks: Task[] = taskTexts.map((text, index) => ({
-                id: nextId + index,
-                text,
-                completed: false,
-            }));
-            setTasks(prev => [...prev, ...newTasks]);
-            setNextId(prev => prev + newTasks.length);
+            
+            if (supabase && userProfile.id) {
+                const newTasksData = taskTexts.map(text => ({
+                    user_id: userProfile.id,
+                    text,
+                    completed: false,
+                }));
+                const { data, error } = await supabase
+                    .from('tasks')
+                    .insert(newTasksData)
+                    .select();
+                
+                if (!error && data) {
+                    setTasks(prev => [...data, ...prev]);
+                } else {
+                    console.error("Supabase insert error:", error);
+                }
+            } else {
+                const newTasks: Task[] = taskTexts.map((text, index) => ({
+                    id: Date.now() + index,
+                    text,
+                    completed: false,
+                }));
+                setTasks(prev => [...newTasks, ...prev]);
+            }
             setGoal('');
         } catch (error) {
             console.error("Error generating study plan:", error);
@@ -34,14 +73,36 @@ const PlannerModule: React.FC = () => {
         }
     };
     
-    const handleToggleTask = (id: number) => {
-        setTasks(tasks.map(task => 
-            task.id === id ? { ...task, completed: !task.completed } : task
-        ));
+    const handleToggleTask = async (task: Task) => {
+        const newCompleted = !task.completed;
+        
+        if (supabase && userProfile.id) {
+            const { error } = await supabase
+                .from('tasks')
+                .update({ completed: newCompleted })
+                .eq('id', task.id);
+            
+            if (!error) {
+                setTasks(tasks.map(t => t.id === task.id ? { ...t, completed: newCompleted } : t));
+            }
+        } else {
+            setTasks(tasks.map(t => t.id === task.id ? { ...t, completed: newCompleted } : t));
+        }
     };
 
-    const handleDeleteTask = (id: number) => {
-        setTasks(tasks.filter(task => task.id !== id));
+    const handleDeleteTask = async (id: string | number) => {
+        if (supabase && userProfile.id) {
+            const { error } = await supabase
+                .from('tasks')
+                .delete()
+                .eq('id', id);
+            
+            if (!error) {
+                setTasks(tasks.filter(task => task.id !== id));
+            }
+        } else {
+            setTasks(tasks.filter(task => task.id !== id));
+        }
     };
 
     return (
@@ -76,7 +137,7 @@ const PlannerModule: React.FC = () => {
                                 type="checkbox"
                                 id={`task-${task.id}`}
                                 checked={task.completed}
-                                onChange={() => handleToggleTask(task.id)}
+                                onChange={() => handleToggleTask(task)}
                                 className="h-5 w-5 rounded border-gray-300 text-[var(--accent)] focus:ring-[var(--accent)] cursor-pointer bg-transparent"
                             />
                             <label htmlFor={`task-${task.id}`} className={`flex-grow mx-4 cursor-pointer ${task.completed ? 'line-through text-[var(--foreground-muted)]' : 'text-[var(--foreground)]'}`}>

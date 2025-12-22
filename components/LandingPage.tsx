@@ -3,18 +3,19 @@ import React, { useState } from 'react';
 import Card from './GlassCard';
 
 interface LandingPageProps {
-  onLogin: (name: string) => void;
+  onLogin: (name: string, email: string) => void;
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim()) {
-      onLogin(name.trim());
+    if (name.trim() && email.trim()) {
+      onLogin(name.trim(), email.trim());
     } else {
-      alert("Please enter your name. The AI wants to greet you properly!");
+      alert("Please enter both your name and email to continue.");
     }
   };
 
@@ -26,25 +27,35 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
             Study Buddy
           </h1>
           <p className="mt-4 text-lg md:text-xl text-[var(--foreground-muted)] max-w-2xl mx-auto">
-           Built to make you smarter — or at least look like it.
+           Your persistent, AI-powered academic companion.
           </p>
         </div>
 
         <div className="w-full max-w-md mx-auto animate-fade-in-up">
           <Card>
-            <h2 className="text-3xl font-bold mb-2 text-[var(--foreground)] text-center">Welcome!</h2>
-            <p className="text-[var(--foreground-muted)] mb-8 text-center">What should we call you?</p>
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-4">
+            <h2 className="text-2xl font-bold mb-2 text-[var(--foreground)] text-center">Sign In / Join</h2>
+            <p className="text-[var(--foreground-muted)] mb-8 text-center text-sm">All your quizzes and plans will be saved to your account.</p>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)] mb-1 ml-1">Full Name</label>
                 <input 
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter your name..." 
+                  placeholder="e.g. Alex Smith" 
+                  className="w-full px-4 py-3 bg-[var(--input-bg)] rounded-lg border border-[var(--input-border)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition text-[var(--foreground)]" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)] mb-1 ml-1">Email Address</label>
+                <input 
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="alex@school.edu" 
                   className="w-full px-4 py-3 bg-[var(--input-bg)] rounded-lg border border-[var(--input-border)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition text-[var(--foreground)]" />
               </div>
               <button type="submit" className="w-full mt-6 bg-[var(--primary)] text-[var(--primary-foreground)] font-bold py-3 px-4 rounded-lg hover:bg-opacity-90 transition-transform transform hover:scale-105 shadow-lg">
-                Start Studying
+                Enter Dashboard
               </button>
             </form>
           </Card>

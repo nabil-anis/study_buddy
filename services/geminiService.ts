@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { QuizQuestion, Flashcard, Task } from '../types';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -5,7 +6,6 @@ import * as pdfjsLib from 'pdfjs-dist';
 // Assume mammoth and XLSX are loaded globally from the script tags in index.html
 declare const mammoth: any;
 declare const XLSX: any;
-
 
 // Set worker path for pdf.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/build/pdf.worker.min.mjs';
@@ -59,7 +59,6 @@ export const parseFileContent = (file: File): Promise<string> => {
 
         reader.onerror = (error) => reject(error);
         
-        // For text files, read as text. For others, read as ArrayBuffer.
         if (file.type.startsWith('text/')) {
             reader.readAsText(file);
         } else {
@@ -68,18 +67,10 @@ export const parseFileContent = (file: File): Promise<string> => {
     });
 };
 
-
 const buildPrompt = (baseInstruction: string, context?: string): string => {
   if (context) {
-    // Truncate context to avoid hitting token limits
-    const truncatedContext = context.length > 15000 ? context.substring(0, 15000) : context;
-    return `${baseInstruction}
-    
-    Please base your response on the following document content:
-    ---
-    ${truncatedContext}
-    ---
-    `;
+    const truncatedContext = context.length > 25000 ? context.substring(0, 25000) : context;
+    return `${baseInstruction}\n\nPlease base your response on the following document content:\n---\n${truncatedContext}\n---`;
   }
   return baseInstruction;
 }
@@ -88,7 +79,7 @@ export const summarizeText = async (text: string): Promise<string> => {
   try {
     const prompt = `Summarize the following text concisely, focusing on the key points. Here is the text: "${text}"`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: buildPrompt(prompt),
     });
     return response.text;
@@ -104,14 +95,13 @@ export const generateQuiz = async (topic: string, count: number, difficulty: 'Ea
     
     if (existingQuestions.length > 0) {
       const existingQuestionStrings = existingQuestions.map(q => `- "${q.question}"`).join('\n');
-      const truncatedExisting = existingQuestionStrings.length > 3000 ? existingQuestionStrings.substring(0, 3000) + '...' : existingQuestionStrings;
-      baseInstruction += `\n\nIMPORTANT: Ensure the new questions are different from the ones already asked. Do NOT repeat any of the following questions:\n${truncatedExisting}`;
+      baseInstruction += `\n\nIMPORTANT: Do NOT repeat any of the following questions:\n${existingQuestionStrings.substring(0, 2000)}`;
     }
 
     const prompt = buildPrompt(baseInstruction, context);
     
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -121,10 +111,7 @@ export const generateQuiz = async (topic: string, count: number, difficulty: 'Ea
             type: Type.OBJECT,
             properties: {
               question: { type: Type.STRING },
-              options: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING },
-              },
+              options: { type: Type.ARRAY, items: { type: Type.STRING } },
               correctAnswer: { type: Type.STRING },
             },
             required: ['question', 'options', 'correctAnswer'],
@@ -133,8 +120,7 @@ export const generateQuiz = async (topic: string, count: number, difficulty: 'Ea
       },
     });
     
-    const jsonString = response.text.trim();
-    return JSON.parse(jsonString) as QuizQuestion[];
+    return JSON.parse(response.text.trim()) as QuizQuestion[];
   } catch (error) {
     console.error("Gemini API error in generateQuiz:", error);
     throw new Error("Failed to generate quiz questions.");
@@ -144,12 +130,12 @@ export const generateQuiz = async (topic: string, count: number, difficulty: 'Ea
 export const generateFlashcards = async (topic: string, count: number, context?: string): Promise<Flashcard[]> => {
     try {
         const prompt = buildPrompt(
-            `Generate a JSON array of ${count} flashcards about "${topic}". Each flashcard should be an object with two properties: "front" (a question or term) and "back" (the answer or definition).`,
+            `Generate a JSON array of ${count} flashcards about "${topic}". Each flashcard should be an object with "front" and "back" properties.`,
             context
         );
 
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3-flash-preview',
             contents: prompt,
             config: {
                 responseMimeType: 'application/json',
@@ -167,8 +153,7 @@ export const generateFlashcards = async (topic: string, count: number, context?:
             }
         });
 
-        const jsonString = response.text.trim();
-        return JSON.parse(jsonString) as Flashcard[];
+        return JSON.parse(response.text.trim()) as Flashcard[];
     } catch (error) {
         console.error("Gemini API error in generateFlashcards:", error);
         throw new Error("Failed to generate flashcards.");
@@ -178,8 +163,8 @@ export const generateFlashcards = async (topic: string, count: number, context?:
 export const askAboutFile = async (fileContent: string, question: string): Promise<string> => {
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: buildPrompt(`Answer the user's question in a helpful and conversational way. USER'S QUESTION: "${question}"`, fileContent),
+      model: 'gemini-3-flash-preview',
+      contents: buildPrompt(`Answer the user's question in a helpful way. QUESTION: "${question}"`, fileContent),
     });
     return response.text;
   } catch (error) {
@@ -191,20 +176,14 @@ export const askAboutFile = async (fileContent: string, question: string): Promi
 export const generateStudyPlan = async (goal: string): Promise<string[]> => {
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: `Generate a JSON array of actionable study tasks for the following goal: "${goal}". The array should contain strings representing individual tasks. For example, for "pass my biology exam", tasks could be "Review chapter 1 notes", "Create flashcards for vocabulary", "Take practice quiz A". Provide between 5 and 8 tasks.`,
+            model: 'gemini-3-flash-preview',
+            contents: `Generate a JSON array of 5-8 actionable study tasks for the goal: "${goal}".`,
             config: {
                 responseMimeType: 'application/json',
-                responseSchema: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.STRING
-                    }
-                }
+                responseSchema: { type: Type.ARRAY, items: { type: Type.STRING } }
             }
         });
-        const jsonString = response.text.trim();
-        return JSON.parse(jsonString);
+        return JSON.parse(response.text.trim());
     } catch (error) {
         console.error("Gemini API error in generateStudyPlan:", error);
         throw new Error("Failed to generate a study plan.");
@@ -214,13 +193,11 @@ export const generateStudyPlan = async (goal: string): Promise<string[]> => {
 export const getStudyTip = async (): Promise<string> => {
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: "Generate a short, upbeat, one-sentence motivational study tip for a student. Keep it under 15 words and don't use quotation marks.",
+            model: 'gemini-3-flash-preview',
+            contents: "Generate a short, upbeat, one-sentence motivational study tip. Under 15 words.",
         });
         return response.text;
     } catch (error) {
-        console.error("Gemini API error in getStudyTip:", error);
-        // Return a fallback tip on error
         return "Keep going, you're doing great!";
     }
 };
