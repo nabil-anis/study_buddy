@@ -66,20 +66,22 @@ const SummarizerModule: React.FC<SummarizerModuleProps> = ({ userProfile }) => {
     const isProcessing = isLoading || isParsing;
 
     return (
-        <Card className="h-full flex flex-col p-4 sm:p-6">
-            <div className="flex items-center mb-4">
-                <SparklesIcon className="w-8 h-8 text-[var(--accent)] mr-3" />
-                <h2 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">AI Summarizer</h2>
+        <Card className="h-full flex flex-col p-4 sm:p-6 overflow-hidden">
+            <div className="flex-shrink-0">
+                <div className="flex items-center mb-2">
+                    <SparklesIcon className="w-8 h-8 text-[var(--accent)] mr-3" />
+                    <h2 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">AI Summarizer</h2>
+                </div>
+                <p className="text-[var(--foreground-muted)] mb-4 text-sm">Paste notes or upload a doc. The AI will save the summary to your profile.</p>
             </div>
-            <p className="text-[var(--foreground-muted)] mb-6">Paste notes or upload a doc. The AI will save the summary to your profile.</p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow min-h-[300px]">
-                <div className="flex flex-col">
-                    <div className="flex justify-between items-center mb-2">
-                        <h3 className="font-semibold text-[var(--foreground)]/90">Your Text</h3>
-                        <label htmlFor="file-upload-summarizer" className="cursor-pointer flex items-center gap-2 text-sm text-[var(--accent)] hover:opacity-80 transition">
-                            <UploadIcon className="w-4 h-4" />
-                            <span className="truncate max-w-[200px]">{fileName || 'Upload File'}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow min-h-0">
+                <div className="flex flex-col min-h-0">
+                    <div className="flex justify-between items-center mb-2 flex-shrink-0">
+                        <h3 className="font-semibold text-sm text-[var(--foreground)]/90">Your Text</h3>
+                        <label htmlFor="file-upload-summarizer" className="cursor-pointer flex items-center gap-2 text-xs text-[var(--accent)] hover:opacity-80 transition">
+                            <UploadIcon className="w-3 h-3" />
+                            <span className="truncate max-w-[120px]">{fileName || 'Upload File'}</span>
                         </label>
                         <input id="file-upload-summarizer" type="file" className="hidden" onChange={handleFileChange} accept=".txt,.md,.csv,.pdf,.docx,.xlsx" disabled={isProcessing} />
                     </div>
@@ -87,30 +89,30 @@ const SummarizerModule: React.FC<SummarizerModuleProps> = ({ userProfile }) => {
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder={isParsing ? "Reading your document..." : "Paste your text here."}
-                        className="w-full flex-grow p-4 bg-[var(--input-bg)] text-[var(--foreground)] rounded-lg border border-[var(--input-border)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] resize-none"
+                        className="w-full flex-grow p-4 bg-[var(--input-bg)] text-[var(--foreground)] rounded-lg border border-[var(--input-border)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] resize-none text-sm"
                         disabled={isProcessing}
                     />
                 </div>
-                <div className="flex flex-col">
-                    <h3 className="font-semibold mb-2 text-[var(--foreground)]/90">Summary</h3>
+                <div className="flex flex-col min-h-0">
+                    <h3 className="font-semibold mb-2 text-sm text-[var(--foreground)]/90 flex-shrink-0">Summary</h3>
                     <div className="w-full flex-grow p-4 bg-[var(--primary)]/5 rounded-lg border border-[var(--input-border)] overflow-y-auto">
                         {isLoading ? (
                             <div className="flex items-center justify-center h-full text-[var(--foreground-muted)]">
                                 <div className="loader !border-[var(--accent)] !border-b-transparent"></div>
-                                <p className="ml-3">Summarizing...</p>
+                                <p className="ml-3 text-sm">Summarizing...</p>
                             </div>
                         ) : (
-                            summary ? <p className="text-[var(--foreground)] whitespace-pre-wrap">{summary}</p> : <p className="text-[var(--foreground-muted)]">Generated summary will be auto-saved.</p>
+                            summary ? <p className="text-[var(--foreground)] text-sm whitespace-pre-wrap leading-relaxed">{summary}</p> : <p className="text-[var(--foreground-muted)] text-sm italic">Generated summary will be auto-saved.</p>
                         )}
                     </div>
                 </div>
             </div>
 
-            <div className="mt-6 text-center">
+            <div className="mt-4 flex-shrink-0">
                 <button 
                     onClick={handleSummarize}
                     disabled={isProcessing || !inputText}
-                    className="px-8 py-3 bg-[var(--accent)] text-[var(--accent-foreground)] font-bold rounded-lg hover:bg-opacity-90 transition-transform transform hover:scale-105 shadow-lg flex items-center justify-center gap-3 mx-auto"
+                    className="w-full md:w-auto px-8 py-3 bg-[var(--accent)] text-[var(--accent-foreground)] font-bold rounded-lg hover:bg-opacity-90 transition-transform transform enabled:hover:scale-105 shadow-lg flex items-center justify-center gap-3 mx-auto disabled:opacity-50"
                 >
                     {isLoading ? 'Processing...' : 'Summarize & Save'}
                 </button>
