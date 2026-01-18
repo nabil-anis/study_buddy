@@ -28,27 +28,20 @@ const SummarizerModule: React.FC<SummarizerModuleProps> = ({ userProfile }) => {
             setInputText(text);
         } catch (error) {
             console.error("Error parsing file:", error);
-            alert("Sorry, I couldn't read that file. Please try a different one.");
             setFileName('');
         } finally {
             setIsParsing(false);
         }
-        event.target.value = '';
       }
     };
 
     const handleSummarize = async () => {
-        if (!inputText.trim()) {
-            alert("You need to give me something to summarize.");
-            return;
-        }
+        if (!inputText.trim()) return;
         setIsLoading(true);
         setSummary('');
         try {
             const result = await summarizeText(inputText);
             setSummary(result);
-            
-            // Save to Supabase
             if (supabase && userProfile?.id) {
                 await supabase.from('summaries').insert([{
                     user_id: userProfile.id,
@@ -57,64 +50,65 @@ const SummarizerModule: React.FC<SummarizerModuleProps> = ({ userProfile }) => {
                 }]);
             }
         } catch (error) {
-            console.error("Error summarizing text:", error);
+            console.error(error);
         } finally {
             setIsLoading(false);
         }
     };
 
-    const isProcessing = isLoading || isParsing;
-
     return (
-        <Card className="h-full flex flex-col p-4 sm:p-6 overflow-hidden">
-            <div className="flex-shrink-0">
-                <div className="flex items-center mb-2">
-                    <SparklesIcon className="w-8 h-8 text-[var(--accent)] mr-3" />
-                    <h2 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">AI Summarizer</h2>
+        <Card className="flex flex-col p-5 lg:p-8 min-h-0 h-full max-h-full">
+            <div className="flex-shrink-0 flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 lg:mb-8">
+                <div>
+                    <h2 className="text-xl lg:text-2xl font-bold tracking-tight flex items-center gap-3">
+                        Summarizer
+                        {isParsing && <div className="loader !w-3 !h-3"></div>}
+                    </h2>
+                    <p className="text-[var(--foreground-muted)] text-[12px] lg:text-[13px] font-medium">Extract the core essence.</p>
                 </div>
-                <p className="text-[var(--foreground-muted)] mb-4 text-sm">Paste notes or upload a doc. The AI will save the summary to your profile.</p>
+                <label className="apple-pill px-4 py-2 bg-[var(--foreground)]/[0.04] hover:bg-[var(--foreground)]/[0.08] cursor-pointer flex items-center gap-2 text-[11px] font-bold w-full sm:w-auto justify-center">
+                    <UploadIcon className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    <span className="truncate max-w-[120px]">{fileName || 'Upload'}</span>
+                    <input type="file" className="hidden" onChange={handleFileChange} accept=".txt,.pdf,.docx" />
+                </label>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow min-h-0">
-                <div className="flex flex-col min-h-0">
-                    <div className="flex justify-between items-center mb-2 flex-shrink-0">
-                        <h3 className="font-semibold text-sm text-[var(--foreground)]/90">Your Text</h3>
-                        <label htmlFor="file-upload-summarizer" className="cursor-pointer flex items-center gap-2 text-xs text-[var(--accent)] hover:opacity-80 transition">
-                            <UploadIcon className="w-3 h-3" />
-                            <span className="truncate max-w-[120px]">{fileName || 'Upload File'}</span>
-                        </label>
-                        <input id="file-upload-summarizer" type="file" className="hidden" onChange={handleFileChange} accept=".txt,.md,.csv,.pdf,.docx,.xlsx" disabled={isProcessing} />
-                    </div>
+            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 lg:gap-8 flex-grow min-h-0 overflow-hidden">
+                <div className="flex flex-col gap-2 min-h-0 h-1/2 lg:h-full">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[var(--foreground-muted)] opacity-60">Input</span>
                     <textarea 
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
-                        placeholder={isParsing ? "Reading your document..." : "Paste your text here."}
-                        className="w-full flex-grow p-4 bg-[var(--input-bg)] text-[var(--foreground)] rounded-lg border border-[var(--input-border)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] resize-none text-sm"
-                        disabled={isProcessing}
+                        placeholder="Paste text here..."
+                        className="w-full h-full p-4 ios-input text-[13px] lg:text-[14px] leading-relaxed resize-none focus:outline-none rounded-2xl"
                     />
                 </div>
-                <div className="flex flex-col min-h-0">
-                    <h3 className="font-semibold mb-2 text-sm text-[var(--foreground)]/90 flex-shrink-0">Summary</h3>
-                    <div className="w-full flex-grow p-4 bg-[var(--primary)]/5 rounded-lg border border-[var(--input-border)] overflow-y-auto">
+                <div className="flex flex-col gap-2 min-h-0 h-1/2 lg:h-full">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[var(--foreground-muted)] opacity-60">Synthesis</span>
+                    <div className="w-full h-full p-4 lg:p-6 rounded-2xl bg-[var(--primary)]/[0.03] border border-[var(--primary)]/[0.08] overflow-y-auto">
                         {isLoading ? (
-                            <div className="flex items-center justify-center h-full text-[var(--foreground-muted)]">
-                                <div className="loader !border-[var(--accent)] !border-b-transparent"></div>
-                                <p className="ml-3 text-sm">Summarizing...</p>
+                            <div className="flex flex-col items-center justify-center h-full gap-3">
+                                <div className="loader !w-5 !h-5"></div>
+                                <p className="text-[11px] font-semibold opacity-40">Thinking...</p>
                             </div>
                         ) : (
-                            summary ? <p className="text-[var(--foreground)] text-sm whitespace-pre-wrap leading-relaxed">{summary}</p> : <p className="text-[var(--foreground-muted)] text-sm italic">Generated summary will be auto-saved.</p>
+                            summary ? (
+                                <p className="text-[13.5px] lg:text-[14.5px] font-medium leading-[1.6] text-[var(--foreground)] animate-fade-in">{summary}</p>
+                            ) : (
+                                <p className="text-[12px] font-medium text-[var(--foreground-muted)] opacity-40 italic">Results appear here.</p>
+                            )
                         )}
                     </div>
                 </div>
             </div>
 
-            <div className="mt-4 flex-shrink-0">
+            <div className="mt-6 flex-shrink-0 flex justify-center">
                 <button 
                     onClick={handleSummarize}
-                    disabled={isProcessing || !inputText}
-                    className="w-full md:w-auto px-8 py-3 bg-[var(--accent)] text-[var(--accent-foreground)] font-bold rounded-lg hover:bg-opacity-90 transition-transform transform enabled:hover:scale-105 shadow-lg flex items-center justify-center gap-3 mx-auto disabled:opacity-50"
+                    disabled={isLoading || !inputText}
+                    className="apple-pill px-8 py-3 bg-[var(--primary)] text-white shadow-xl shadow-[var(--primary)]/20 hover:scale-[1.02] disabled:opacity-30 text-[14px] w-full sm:w-auto"
                 >
-                    {isLoading ? 'Processing...' : 'Summarize & Save'}
+                    {isLoading ? 'Processing' : 'Generate Summary'}
                 </button>
             </div>
         </Card>

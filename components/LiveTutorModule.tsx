@@ -9,15 +9,27 @@ interface LiveTutorModuleProps {
   userProfile: UserProfile;
 }
 
+interface TranscriptLine {
+    sender: 'tutor' | 'user';
+    text: string;
+}
+
 const LiveTutorModule: React.FC<LiveTutorModuleProps> = ({ userProfile }) => {
   const [isActive, setIsActive] = useState(false);
-  const [transcript, setTranscript] = useState<string[]>([]);
+  const [transcript, setTranscript] = useState<TranscriptLine[]>([]);
   const [status, setStatus] = useState<'idle' | 'connecting' | 'listening' | 'speaking'>('idle');
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const nextStartTimeRef = useRef(0);
   const sessionRef = useRef<any>(null);
   const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
+  const transcriptEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (transcriptEndRef.current) {
+        transcriptEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [transcript]);
 
   const decode = (base64: string) => {
     const binaryString = atob(base64);
@@ -55,7 +67,7 @@ const LiveTutorModule: React.FC<LiveTutorModuleProps> = ({ userProfile }) => {
     if (isActive) return;
     setStatus('connecting');
     setIsActive(true);
-    setTranscript(["Tutor: Hello! I'm your AI study buddy. How can I help you learn today?"]);
+    setTranscript([{ sender: 'tutor', text: "Hello! I'm your AI study buddy. How can I help you learn today?" }]);
 
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
@@ -66,7 +78,7 @@ const LiveTutorModule: React.FC<LiveTutorModuleProps> = ({ userProfile }) => {
       audioContextRef.current = outputCtx;
 
       const sessionPromise = ai.live.connect({
-        model: 'gemini-2.5-flash-native-audio-preview-09-2025',
+        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
         callbacks: {
           onopen: () => {
             setStatus('listening');
@@ -88,7 +100,12 @@ const LiveTutorModule: React.FC<LiveTutorModuleProps> = ({ userProfile }) => {
           },
           onmessage: async (message: LiveServerMessage) => {
             if (message.serverContent?.outputTranscription) {
-              setTranscript(prev => [...prev.slice(-10), `Tutor: ${message.serverContent!.outputTranscription!.text}`]);
+              const text = message.serverContent.outputTranscription.text;
+              setTranscript(prev => [...prev, { sender: 'tutor', text }]);
+            }
+            if (message.serverContent?.inputTranscription) {
+              const text = message.serverContent.inputTranscription.text;
+              setTranscript(prev => [...prev, { sender: 'user', text }]);
             }
 
             const audioData = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
@@ -121,6 +138,7 @@ const LiveTutorModule: React.FC<LiveTutorModuleProps> = ({ userProfile }) => {
         config: {
           responseModalities: [Modality.AUDIO],
           outputAudioTranscription: {},
+          inputAudioTranscription: {},
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } },
           systemInstruction: `You are an encouraging and highly knowledgeable personal tutor for a student named ${userProfile.name}. Your goal is to explain complex concepts simply using analogies. Be concise, interactive, and ask questions to check for understanding. You are currently in a live audio study session.`,
         }
@@ -137,7 +155,6 @@ const LiveTutorModule: React.FC<LiveTutorModuleProps> = ({ userProfile }) => {
     setIsActive(false);
     setStatus('idle');
     if (sessionRef.current) {
-        // sessionRef.current.close(); // Not always available, depends on SDK version
         sessionRef.current = null;
     }
     if (audioContextRef.current) {
@@ -151,55 +168,63 @@ const LiveTutorModule: React.FC<LiveTutorModuleProps> = ({ userProfile }) => {
   }, [isActive]);
 
   return (
-    <Card className="h-full flex flex-col items-center justify-center p-6 text-center">
-      <div className="relative mb-8">
-        <div className={`w-32 h-32 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] flex items-center justify-center shadow-xl transition-all duration-500 ${isActive ? 'scale-110' : ''}`}>
-           <TutorIcon className="w-16 h-16 text-white" />
-        </div>
-        {isActive && (
-            <div className="absolute inset-0 rounded-full border-4 border-[var(--primary)] animate-ping opacity-20"></div>
-        )}
-      </div>
-
-      <h2 className="text-3xl font-bold mb-2">Live AI Tutor</h2>
-      <p className="text-[var(--foreground-muted)] mb-8 max-w-md">
-        Speak directly with your AI tutor. Ask for explanations, practice problems, or learning tips in real-time.
-      </p>
-
-      <div className="w-full max-w-lg bg-black/10 rounded-xl p-4 h-48 overflow-y-auto mb-8 text-left border border-[var(--card-border)]">
-        {transcript.length === 0 ? (
-            <p className="text-center text-[var(--foreground-muted)] italic mt-16 text-sm">Session transcript will appear here...</p>
-        ) : (
-            transcript.map((line, i) => (
-                <p key={i} className={`mb-2 text-sm ${line.startsWith('Tutor:') ? 'text-[var(--primary)] font-medium' : 'text-[var(--foreground)]'}`}>
-                    {line}
+    <Card className="h-full flex flex-col p-6 overflow-hidden">
+      <div className="flex-shrink-0 flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] flex items-center justify-center shadow-lg transition-transform ${isActive ? 'scale-110 animate-pulse' : ''}`}>
+                <TutorIcon className="w-6 h-6 text-white" />
+            </div>
+            <div className="text-left">
+                <h2 className="text-xl font-bold leading-tight">Live AI Tutor</h2>
+                <p className="text-xs text-[var(--foreground-muted)] font-bold uppercase tracking-widest">
+                    {status === 'idle' ? 'Ready to help' : status.toUpperCase()}
                 </p>
-            ))
-        )}
+            </div>
+          </div>
+          <button
+              onClick={isActive ? stopTutor : startTutor}
+              className={`px-6 py-2.5 rounded-full font-bold flex items-center gap-2 transition-all shadow-lg text-sm ${
+                  isActive ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-[var(--primary)] text-white hover:opacity-90'
+              }`}
+          >
+              {status === 'connecting' ? <div className="loader !w-4 !h-4 !border-white"></div> : isActive ? <VolumeIcon className="w-4 h-4" /> : <MicIcon className="w-4 h-4" />}
+              {status === 'idle' ? 'Start Voice' : isActive ? 'End Session' : 'Connecting'}
+          </button>
       </div>
 
-      <div className="flex flex-col items-center gap-4">
-        <button
-            onClick={isActive ? stopTutor : startTutor}
-            className={`px-10 py-4 rounded-full font-bold flex items-center gap-3 transition-all transform hover:scale-105 shadow-xl ${
-                isActive ? 'bg-red-500 text-white' : 'bg-[var(--primary)] text-white'
-            }`}
-        >
-            {status === 'connecting' ? (
-                <div className="loader !w-5 !h-5 !border-white !border-b-transparent"></div>
-            ) : isActive ? (
-                <VolumeIcon className="w-6 h-6" />
+      <div className="flex-grow bg-[var(--primary)]/5 rounded-2xl p-4 overflow-y-auto mb-4 border border-[var(--input-border)] min-h-0">
+        <div className="space-y-4">
+            {transcript.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center text-[var(--foreground-muted)] py-20">
+                    <TutorIcon className="w-12 h-12 mb-4 opacity-20" />
+                    <p className="italic text-sm">Tap "Start Voice" to begin your interactive study session.</p>
+                </div>
             ) : (
-                <MicIcon className="w-6 h-6" />
+                transcript.map((line, i) => (
+                    <div key={i} className={`flex items-start gap-3 ${line.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        {line.sender === 'tutor' && (
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] flex items-center justify-center text-white font-bold flex-shrink-0 text-[10px]">SB</div>
+                        )}
+                        <div className={`max-w-[80%] p-3 px-4 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                            line.sender === 'user' 
+                            ? 'bg-[var(--primary)] text-white rounded-tr-none' 
+                            : 'bg-[var(--input-bg)] text-[var(--foreground)] rounded-tl-none border border-[var(--card-border)]'
+                        }`}>
+                            {line.text}
+                        </div>
+                    </div>
+                ))
             )}
-            {status === 'idle' && 'Start Voice Session'}
-            {status === 'connecting' && 'Connecting...'}
-            {status === 'listening' && 'Listening...'}
-            {status === 'speaking' && 'Tutor is Speaking'}
-        </button>
-        <p className="text-xs text-[var(--foreground-muted)] uppercase tracking-widest font-bold">
-            {isActive ? 'Session Active • Click to Stop' : 'Ready to help'}
-        </p>
+            <div ref={transcriptEndRef} />
+        </div>
+      </div>
+
+      <div className="flex-shrink-0 flex justify-center">
+         <div className="flex items-center gap-6 px-4 py-2 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-full text-[10px] font-bold uppercase tracking-widest text-[var(--foreground-muted)]">
+            <span className={status === 'listening' ? 'text-[var(--primary)] animate-pulse' : ''}>Mic Active</span>
+            <div className="w-px h-3 bg-[var(--card-border)]"></div>
+            <span className={status === 'speaking' ? 'text-[var(--accent)] animate-pulse' : ''}>Tutor Speaking</span>
+         </div>
       </div>
     </Card>
   );

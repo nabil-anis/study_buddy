@@ -18,5 +18,4 @@ export * from './MoonIcon';
 export * from './TutorIcon';
 export * from './ChartBarIcon';
 export * from './CodeIcon';
-// Fix: Export DatabaseIcon so it can be imported from the icons module
 export * from './DatabaseIcon';

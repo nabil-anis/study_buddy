@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import Card from './GlassCard';
 
 interface LandingPageProps {
   onLogin: (name: string, email: string) => void;
@@ -14,52 +13,63 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
     e.preventDefault();
     if (name.trim() && email.trim()) {
       onLogin(name.trim(), email.trim());
-    } else {
-      alert("Please enter both your name and email to continue.");
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 lg:p-8 text-[var(--foreground)] overflow-hidden relative">
-      <div className="w-full max-w-4xl flex flex-col items-center">
-        <div className="text-center mb-12 animate-fade-in-down">
-           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] pb-2">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center p-6 bg-transparent relative overflow-hidden">
+      {/* Decorative Blur Orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-400/10 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-400/10 blur-[120px] rounded-full pointer-events-none"></div>
+
+      <div className="w-full max-w-md z-10">
+        <header className="text-center mb-16 animate-fade-in">
+          <div className="inline-block px-3 py-1 bg-[var(--primary)]/10 text-[var(--primary)] text-[10px] font-black tracking-[0.2em] uppercase rounded-full mb-6">
+            Pro Intelligence
+          </div>
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tighter text-[var(--foreground)] mb-4">
             Study Buddy
           </h1>
-          <p className="mt-4 text-lg md:text-xl text-[var(--foreground-muted)] max-w-2xl mx-auto">
-           Your persistent, AI-powered academic companion.
+          <p className="text-[17px] font-medium text-[var(--foreground-muted)] max-w-sm mx-auto leading-relaxed">
+            Elevate your academic workflow with spatial intelligence.
           </p>
-        </div>
+        </header>
 
-        <div className="w-full max-w-md mx-auto animate-fade-in-up">
-          <Card>
-            <h2 className="text-2xl font-bold mb-2 text-[var(--foreground)] text-center">Sign In / Join</h2>
-            <p className="text-[var(--foreground-muted)] mb-8 text-center text-sm">All your quizzes and plans will be saved to your account.</p>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)] mb-1 ml-1">Full Name</label>
-                <input 
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Alex Smith" 
-                  className="w-full px-4 py-3 bg-[var(--input-bg)] rounded-lg border border-[var(--input-border)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition text-[var(--foreground)]" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--foreground-muted)] mb-1 ml-1">Email Address</label>
-                <input 
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="alex@school.edu" 
-                  className="w-full px-4 py-3 bg-[var(--input-bg)] rounded-lg border border-[var(--input-border)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition text-[var(--foreground)]" />
-              </div>
-              <button type="submit" className="w-full mt-6 bg-[var(--primary)] text-[var(--primary-foreground)] font-bold py-3 px-4 rounded-lg hover:bg-opacity-90 transition-transform transform hover:scale-105 shadow-lg">
-                Enter Dashboard
-              </button>
-            </form>
-          </Card>
+        <div className="apple-glass p-10 rounded-[40px] premium-shadow">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-[var(--foreground-muted)] uppercase tracking-wider ml-1">Full Name</label>
+              <input 
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Name" 
+                className="w-full px-5 py-4 ios-input rounded-[16px] text-[15px] font-medium text-[var(--foreground)] focus:outline-none" 
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-[var(--foreground-muted)] uppercase tracking-wider ml-1">Academic Email</label>
+              <input 
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email" 
+                className="w-full px-5 py-4 ios-input rounded-[16px] text-[15px] font-medium text-[var(--foreground)] focus:outline-none" 
+              />
+            </div>
+            <button 
+              type="submit" 
+              disabled={!name || !email}
+              className="w-full bg-[var(--foreground)] text-[var(--background)] py-4 apple-pill text-[15px] shadow-lg disabled:opacity-20 mt-4"
+            >
+              Continue to Workspace
+            </button>
+          </form>
         </div>
+        
+        <footer className="mt-12 text-center">
+          <p className="text-[12px] font-semibold text-[var(--foreground-muted)] opacity-40">Designed by Study Buddy Inc. &bull; Cupertino</p>
+        </footer>
       </div>
     </div>
   );

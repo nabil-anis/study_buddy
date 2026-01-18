@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Theme } from '../types';
 import { SunIcon, MoonIcon } from './icons';
@@ -8,24 +9,23 @@ interface ThemeToggleProps {
 }
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, toggleTheme }) => {
-  const isCalm = theme === Theme.Calm;
+  const isDark = theme === Theme.Focus;
   return (
     <button
       onClick={toggleTheme}
-      className={`w-14 h-8 rounded-full p-1 flex items-center transition-colors duration-300 relative focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background)] focus:ring-[var(--primary)] ${
-        isCalm ? 'bg-[var(--primary)]' : 'bg-slate-700'
+      className={`relative w-[52px] h-[28px] rounded-full p-1 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] apple-glass shadow-inner overflow-hidden ${
+        isDark ? 'bg-zinc-800/80' : 'bg-zinc-200/80'
       }`}
-      aria-label="Toggle theme"
+      aria-label="Toggle Appearance"
     >
-      <span className="sr-only">Toggle theme</span>
       <div
-        className={`w-6 h-6 rounded-full bg-white shadow-md transform transition-transform duration-300 flex items-center justify-center ${
-          isCalm ? 'translate-x-0' : 'translate-x-6'
+        className={`w-5 h-5 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.15)] flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] ${
+          isDark ? 'translate-x-[24px]' : 'translate-x-0'
         }`}
       >
-        {isCalm 
-          ? <SunIcon className="w-4 h-4 text-yellow-500" />
-          : <MoonIcon className="w-4 h-4 text-slate-700" />
+        {isDark 
+          ? <MoonIcon className="w-3 h-3 text-zinc-900 fill-zinc-900" strokeWidth={2.5} />
+          : <SunIcon className="w-3 h-3 text-amber-500 fill-amber-500" strokeWidth={2.5} />
         }
       </div>
     </button>
