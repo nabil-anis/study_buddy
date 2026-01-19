@@ -57,60 +57,61 @@ const SummarizerModule: React.FC<SummarizerModuleProps> = ({ userProfile }) => {
     };
 
     return (
-        <Card className="flex flex-col p-5 lg:p-8 min-h-0 h-full max-h-full">
-            <div className="flex-shrink-0 flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 lg:mb-8">
+        <Card className="flex flex-col p-6 lg:p-10 min-h-[600px] lg:h-full">
+            <header className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
                 <div>
-                    <h2 className="text-xl lg:text-2xl font-bold tracking-tight flex items-center gap-3">
-                        Summarizer
-                        {isParsing && <div className="loader !w-3 !h-3"></div>}
-                    </h2>
-                    <p className="text-[var(--foreground-muted)] text-[12px] lg:text-[13px] font-medium">Extract the core essence.</p>
+                    <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tighter">Synthesis</h2>
+                    <p className="text-[var(--foreground-muted)] text-sm font-medium">Condense knowledge into core insights.</p>
                 </div>
-                <label className="apple-pill px-4 py-2 bg-[var(--foreground)]/[0.04] hover:bg-[var(--foreground)]/[0.08] cursor-pointer flex items-center gap-2 text-[11px] font-bold w-full sm:w-auto justify-center">
-                    <UploadIcon className="w-3.5 h-3.5" strokeWidth={2.5} />
-                    <span className="truncate max-w-[120px]">{fileName || 'Upload'}</span>
+                <label className="apple-pill px-6 py-2.5 bg-[var(--foreground)]/[0.04] hover:bg-[var(--foreground)]/[0.08] cursor-pointer flex items-center gap-2 text-[12px] font-bold w-full sm:w-auto justify-center">
+                    <UploadIcon className="w-4 h-4" />
+                    <span className="truncate max-w-[150px]">{fileName || 'Upload Doc'}</span>
                     <input type="file" className="hidden" onChange={handleFileChange} accept=".txt,.pdf,.docx" />
                 </label>
-            </div>
+            </header>
             
-            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 lg:gap-8 flex-grow min-h-0 overflow-hidden">
-                <div className="flex flex-col gap-2 min-h-0 h-1/2 lg:h-full">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-[var(--foreground-muted)] opacity-60">Input</span>
+            <div className="flex flex-col flex-grow gap-8 min-h-0 overflow-visible lg:overflow-hidden">
+                <div className="flex flex-col gap-3 h-[300px] lg:h-1/2 flex-shrink-0 lg:flex-shrink">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--foreground-muted)] opacity-50 ml-1">Input Text</span>
                     <textarea 
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
-                        placeholder="Paste text here..."
-                        className="w-full h-full p-4 ios-input text-[13px] lg:text-[14px] leading-relaxed resize-none focus:outline-none rounded-2xl"
+                        placeholder="Paste or upload your reading material..."
+                        className="w-full h-full p-5 lg:p-6 ios-input text-[14px] lg:text-[15px] leading-relaxed resize-none focus:outline-none rounded-[24px]"
                     />
                 </div>
-                <div className="flex flex-col gap-2 min-h-0 h-1/2 lg:h-full">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-[var(--foreground-muted)] opacity-60">Synthesis</span>
-                    <div className="w-full h-full p-4 lg:p-6 rounded-2xl bg-[var(--primary)]/[0.03] border border-[var(--primary)]/[0.08] overflow-y-auto">
+
+                <div className="flex flex-col gap-3 min-h-[200px] lg:h-1/2 flex-grow overflow-hidden">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--foreground-muted)] opacity-50 ml-1">AI Summary</span>
+                    <div className="w-full h-full p-6 lg:p-8 rounded-[24px] bg-[var(--primary)]/[0.03] border border-[var(--primary)]/[0.1] overflow-y-auto">
                         {isLoading ? (
-                            <div className="flex flex-col items-center justify-center h-full gap-3">
-                                <div className="loader !w-5 !h-5"></div>
-                                <p className="text-[11px] font-semibold opacity-40">Thinking...</p>
+                            <div className="flex flex-col items-center justify-center h-full gap-4">
+                                <div className="loader !w-6 !h-6"></div>
+                                <p className="text-[11px] font-black uppercase tracking-[0.2em] opacity-40">Synthesizing Assets...</p>
                             </div>
                         ) : (
                             summary ? (
-                                <p className="text-[13.5px] lg:text-[14.5px] font-medium leading-[1.6] text-[var(--foreground)] animate-fade-in">{summary}</p>
+                                <p className="text-[14.5px] lg:text-[16px] font-medium leading-[1.65] text-[var(--foreground)] animate-fade-in">{summary}</p>
                             ) : (
-                                <p className="text-[12px] font-medium text-[var(--foreground-muted)] opacity-40 italic">Results appear here.</p>
+                                <div className="flex flex-col items-center justify-center h-full opacity-20">
+                                   <SparklesIcon className="w-8 h-8 mb-4" />
+                                   <p className="text-sm font-bold italic">Summary will appear here.</p>
+                                </div>
                             )
                         )}
                     </div>
                 </div>
             </div>
 
-            <div className="mt-6 flex-shrink-0 flex justify-center">
+            <footer className="mt-8 flex justify-center">
                 <button 
                     onClick={handleSummarize}
                     disabled={isLoading || !inputText}
-                    className="apple-pill px-8 py-3 bg-[var(--primary)] text-white shadow-xl shadow-[var(--primary)]/20 hover:scale-[1.02] disabled:opacity-30 text-[14px] w-full sm:w-auto"
+                    className="apple-pill w-full sm:w-auto px-12 py-4 bg-[var(--primary)] text-white shadow-2xl shadow-[var(--primary)]/20 hover:scale-[1.02] disabled:opacity-30 text-[15px] font-bold"
                 >
-                    {isLoading ? 'Processing' : 'Generate Summary'}
+                    {isLoading ? 'Processing...' : 'Generate Core Insights'}
                 </button>
-            </div>
+            </footer>
         </Card>
     );
 };

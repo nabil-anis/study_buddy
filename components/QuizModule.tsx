@@ -131,26 +131,26 @@ const QuizModule: React.FC<QuizModuleProps> = ({ userProfile }) => {
 
   if (view === 'history') {
     return (
-        <Card className="h-full flex flex-col p-5 lg:p-10 overflow-hidden">
-            <header className="flex items-center justify-between mb-6 lg:mb-10">
-                <button onClick={() => setView('selection')} className="apple-pill px-3 py-1 flex items-center gap-2 text-[var(--primary)] font-bold text-[13px]">
+        <Card className="h-full flex flex-col p-6 lg:p-10">
+            <header className="flex items-center justify-between mb-8">
+                <button onClick={() => setView('selection')} className="apple-pill px-4 py-2 bg-[var(--foreground)]/[0.04] flex items-center gap-2 text-[var(--foreground)] font-bold text-[13px]">
                     <ChevronLeftIcon className="w-3.5 h-3.5" /> Back
                 </button>
                 <h2 className="text-xl font-bold tracking-tight">Records</h2>
                 <div className="w-12"></div>
             </header>
-            <div className="flex-grow overflow-y-auto space-y-2 lg:space-y-3 px-1">
+            <div className="flex-grow overflow-y-auto space-y-3 px-1">
                 {history.length === 0 ? (
-                    <p className="text-center text-[var(--foreground-muted)] py-20 text-xs font-medium opacity-40 italic">No history yet.</p>
+                    <p className="text-center text-[var(--foreground-muted)] py-20 text-xs font-medium opacity-40 italic">Academic history is empty.</p>
                 ) : (
                     history.map((item) => (
-                        <div key={item.id} className="p-4 lg:p-6 flex justify-between items-center bg-[var(--foreground)]/[0.03] rounded-2xl border border-[var(--card-border)]">
+                        <div key={item.id} className="p-5 flex justify-between items-center bg-[var(--foreground)]/[0.03] rounded-2xl border border-[var(--card-border)]">
                             <div className="min-w-0 flex-1 pr-4">
-                                <h4 className="font-bold text-[13px] lg:text-[15px] truncate mb-0.5">{item.topic}</h4>
+                                <h4 className="font-bold text-[14px] lg:text-[15px] truncate mb-0.5">{item.topic}</h4>
                                 <p className="text-[9px] font-black text-[var(--foreground-muted)] uppercase tracking-widest">{item.difficulty}</p>
                             </div>
                             <div className="text-right">
-                                <span className="text-[15px] lg:text-[18px] font-black text-[var(--primary)]">{Math.round((item.score / item.total_questions) * 100)}%</span>
+                                <span className="text-[16px] lg:text-[18px] font-black text-[var(--primary)]">{Math.round((item.score / item.total_questions) * 100)}%</span>
                             </div>
                         </div>
                     ))
@@ -163,42 +163,42 @@ const QuizModule: React.FC<QuizModuleProps> = ({ userProfile }) => {
   if (view === 'selection') {
     const isLoading = quizState === 'loading' || isParsing;
     return (
-      <Card className="flex flex-col items-center justify-center min-h-full p-6 lg:p-12 relative text-center">
+      <Card className="flex flex-col items-center justify-center p-8 lg:p-12 text-center min-h-[500px]">
         <button 
             onClick={() => { fetchHistory(); setView('history'); }} 
-            className="absolute top-4 lg:top-10 right-4 lg:right-12 text-[10px] font-black tracking-widest text-[var(--primary)] uppercase"
+            className="absolute top-6 right-8 text-[10px] font-black tracking-widest text-[var(--primary)] uppercase opacity-60"
         >
             History
         </button>
         <div className="w-16 h-16 lg:w-20 lg:h-20 bg-[var(--primary)]/10 rounded-2xl flex items-center justify-center mb-6">
             <BrainIcon className="w-8 h-8 lg:w-10 lg:h-10 text-[var(--primary)]" strokeWidth={1.5} />
         </div>
-        <h2 className="text-2xl lg:text-4xl font-extrabold tracking-tighter mb-2">Smart Quiz</h2>
-        <p className="text-[var(--foreground-muted)] mb-8 text-[14px] lg:text-[16px] font-medium max-w-sm">Assessments tailored to your materials.</p>
+        <h2 className="text-3xl lg:text-4xl font-extrabold tracking-tighter mb-2">Smart Quiz</h2>
+        <p className="text-[var(--foreground-muted)] mb-8 text-[15px] lg:text-[16px] font-medium max-w-sm">Neural assessments tailored to your materials.</p>
         
         <div className="flex justify-center gap-1 lg:gap-2 mb-8 bg-[var(--foreground)]/[0.04] p-1 rounded-full">
             {(['Easy', 'Moderate', 'Hard'] as const).map(level => (
                 <button
                     key={level}
                     onClick={() => setDifficulty(level)}
-                    className={`px-4 lg:px-6 py-1.5 lg:py-2 rounded-full font-bold text-[11px] lg:text-[13px] transition-all ${difficulty === level ? 'bg-white dark:bg-zinc-800 shadow-sm' : 'text-[var(--foreground-muted)]'}`}
+                    className={`px-5 lg:px-6 py-2 rounded-full font-bold text-[12px] lg:text-[13px] transition-all ${difficulty === level ? 'bg-white dark:bg-zinc-800 shadow-sm text-[var(--foreground)]' : 'text-[var(--foreground-muted)]'}`}
                 >
                     {level}
                 </button>
             ))}
         </div>
 
-        <div className="w-full max-w-xs space-y-3">
+        <div className="w-full max-w-xs space-y-4">
             <input 
               type="text" 
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Topic..."
-              className="w-full px-5 py-3.5 ios-input rounded-2xl text-[14px] focus:outline-none"
+              className="w-full px-5 py-4 ios-input rounded-2xl text-[15px] focus:outline-none"
             />
-            <label className="cursor-pointer w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-[var(--foreground)]/[0.03] rounded-2xl border border-dashed border-[var(--foreground-muted)]/20 text-[13px] font-bold text-[var(--foreground-muted)]">
+            <label className="cursor-pointer w-full flex items-center justify-center gap-2 px-5 py-4 bg-[var(--foreground)]/[0.03] rounded-2xl border border-dashed border-[var(--foreground-muted)]/20 text-[14px] font-bold text-[var(--foreground-muted)]">
                 <UploadIcon className="w-4 h-4" />
-                <span className="truncate">{fileName || 'Sync Doc'}</span>
+                <span className="truncate">{fileName || 'Sync Document'}</span>
                 <input type="file" className="hidden" onChange={handleFileChange} accept=".txt,.pdf,.docx" />
             </label>
         </div>
@@ -206,9 +206,29 @@ const QuizModule: React.FC<QuizModuleProps> = ({ userProfile }) => {
         <button 
           onClick={handleStartQuiz}
           disabled={isLoading || (!topic && !fileContent)}
-          className="mt-10 px-10 py-3.5 bg-[var(--primary)] text-white apple-pill text-[15px] shadow-lg disabled:opacity-20"
+          className="mt-10 w-full max-w-xs py-4 bg-[var(--primary)] text-white apple-pill text-[16px] shadow-xl disabled:opacity-20"
         >
-          {isLoading ? 'Loading...' : 'Start'}
+          {isLoading ? <div className="loader !border-white !w-5 !h-5 mx-auto"></div> : 'Initialize Quiz'}
+        </button>
+      </Card>
+    );
+  }
+
+  if (quizState === 'finished') {
+    return (
+      <Card className="flex flex-col items-center justify-center p-12 text-center min-h-[500px]">
+        <h2 className="text-3xl font-extrabold tracking-tighter mb-4">Quiz Complete</h2>
+        <div className="text-6xl font-black text-[var(--primary)] mb-6">
+          {Math.round((score / questions.length) * 100)}%
+        </div>
+        <p className="text-[var(--foreground-muted)] mb-10 text-[16px] font-medium">
+          Result: {score} / {questions.length}
+        </p>
+        <button 
+          onClick={() => { setView('selection'); setQuizState('idle'); }}
+          className="px-10 py-4 bg-[var(--primary)] text-white apple-pill text-[15px] shadow-xl"
+        >
+          Return Home
         </button>
       </Card>
     );
@@ -216,33 +236,37 @@ const QuizModule: React.FC<QuizModuleProps> = ({ userProfile }) => {
 
   const currentQuestion = questions[currentQuestionIndex];
   return (
-    <Card className="h-full flex flex-col p-5 lg:p-10 overflow-hidden">
-        <header className="flex justify-between items-center mb-6 lg:mb-12">
-            <span className="font-black text-[9px] uppercase tracking-[0.2em] text-[var(--foreground-muted)]">Step {currentQuestionIndex + 1}/{questions.length}</span>
+    <Card className="flex flex-col p-6 lg:p-10 min-h-[500px]">
+        <header className="flex justify-between items-center mb-8 flex-shrink-0">
+            <span className="font-black text-[10px] uppercase tracking-[0.2em] text-[var(--foreground-muted)]">Question {currentQuestionIndex + 1} / {questions.length}</span>
             <div className="px-3 py-1 bg-amber-500/10 text-amber-600 rounded-full text-[10px] font-black">{timeLeft}s</div>
         </header>
         
-        <div className="flex-grow flex flex-col items-center justify-center overflow-y-auto pr-1">
-            <h3 className="text-xl lg:text-2xl font-extrabold mb-6 lg:mb-10 text-center leading-tight max-w-xl">{currentQuestion?.question}</h3>
-            <div className="grid grid-cols-1 gap-3 w-full max-w-xl">
+        <div className="flex-grow flex flex-col items-center justify-center min-h-0 py-4">
+            {/* Clamped Text to prevent overlap */}
+            <h3 className="text-xl lg:text-3xl font-extrabold mb-8 text-center leading-[1.3] max-w-2xl px-2">
+              {currentQuestion?.question}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
                 {currentQuestion?.options.map((option, index) => (
                     <button
                         key={index}
                         onClick={() => !userAnswer && handleAnswer(option)}
-                        className={`p-4 lg:p-5 rounded-2xl text-left transition-all font-semibold text-[14px] border-2
+                        className={`p-4 lg:p-6 rounded-2xl text-left transition-all font-semibold text-[14px] lg:text-[15px] border-2 leading-tight flex items-center justify-between
                         ${!userAnswer ? 'bg-[var(--foreground)]/[0.03] border-transparent hover:border-[var(--primary)]' : ''}
                         ${userAnswer && option === currentQuestion.correctAnswer ? 'bg-green-500/10 border-green-500 text-green-700' : ''}
                         ${userAnswer && option !== currentQuestion.correctAnswer && option === userAnswer ? 'bg-red-500/10 border-red-500 text-red-700' : ''}
+                        ${userAnswer && option !== currentQuestion.correctAnswer && option !== userAnswer ? 'opacity-20 border-transparent' : ''}
                         `}
                     >
-                        {option}
+                        <span>{option}</span>
                     </button>
                 ))}
             </div>
         </div>
 
-        <footer className="h-10 mt-6 flex items-center justify-center">
-            {feedback && <p className="font-black text-[10px] tracking-[0.3em] text-[var(--primary)] uppercase">{feedback}</p>}
+        <footer className="h-10 mt-6 flex items-center justify-center flex-shrink-0">
+            {feedback && <p className={`font-black text-[11px] tracking-[0.3em] ${feedback === 'Correct' ? 'text-green-500' : 'text-red-500'}`}>{feedback.toUpperCase()}</p>}
         </footer>
     </Card>
   );
