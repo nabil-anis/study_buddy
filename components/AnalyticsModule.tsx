@@ -72,80 +72,83 @@ const AnalyticsModule: React.FC<AnalyticsModuleProps> = ({ userProfile }) => {
 
     const summaryItems = [
         { name: 'Quizzes', score: stats.quizzesTaken },
-        { name: 'Flashcards', score: stats.flashcardSets },
-        { name: 'Avg Score', score: stats.avgQuizScore },
+        { name: 'Cards', score: stats.flashcardSets },
+        { name: 'Score', score: stats.avgQuizScore },
     ];
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full overflow-y-auto pb-10">
-            <Card className="flex flex-col">
-                <div className="flex items-center gap-3 mb-6">
-                    <ChartBarIcon className="w-6 h-6 text-[var(--primary)]" />
-                    <h3 className="text-xl font-bold">Cloud Activity Sync</h3>
-                </div>
-                {isLoading ? (
-                    <div className="flex items-center justify-center h-64"><div className="loader"></div></div>
-                ) : (
-                    <div className="h-64 w-full">
+        <div className="flex flex-col gap-6 w-full pb-20">
+            {/* Stat Summary Cards - 3 Columns on Desktop, 1 Column on Mobile */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="p-6 text-center">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--foreground-muted)] mb-2">Mastery</p>
+                    <p className="text-4xl lg:text-5xl font-black text-[var(--primary)] tracking-tighter">{stats.avgQuizScore}%</p>
+                    <p className="text-[10px] font-medium text-[var(--foreground-muted)] mt-2">Across {stats.quizzesTaken} Quizzes</p>
+                </Card>
+                <Card className="p-6 text-center">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--foreground-muted)] mb-2">Tasks</p>
+                    <p className="text-4xl lg:text-5xl font-black text-[var(--accent)] tracking-tighter">{completionRate}%</p>
+                    <p className="text-[10px] font-medium text-[var(--foreground-muted)] mt-2">{stats.tasksDone}/{stats.tasksTotal} Completed</p>
+                </Card>
+                <Card className="p-6 text-center">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--foreground-muted)] mb-2">Assets</p>
+                    <p className="text-4xl lg:text-5xl font-black text-orange-500 tracking-tighter">{stats.flashcardSets}</p>
+                    <p className="text-[10px] font-medium text-[var(--foreground-muted)] mt-2">Flashcard Decks</p>
+                </Card>
+            </div>
+
+            {/* Charts Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="p-6 lg:p-8 flex flex-col min-h-[350px]">
+                    <div className="flex items-center gap-3 mb-6">
+                        <ChartBarIcon className="w-5 h-5 text-[var(--primary)]" />
+                        <h3 className="text-lg font-bold tracking-tight">Academic Distribution</h3>
+                    </div>
+                    {isLoading ? (
+                        <div className="flex-grow flex items-center justify-center"><div className="loader"></div></div>
+                    ) : (
+                        <div className="flex-grow w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={summaryItems} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--foreground-muted)', fontSize: 10, fontWeight: 700}} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--foreground-muted)', fontSize: 10}} />
+                                    <Tooltip cursor={{fill: 'rgba(0,113,227,0.05)'}} contentStyle={{backgroundColor: 'var(--card-bg)', border: 'none', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)'}} />
+                                    <Bar dataKey="score" radius={[6, 6, 0, 0]} barSize={40}>
+                                        {summaryItems.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={index % 2 === 0 ? 'var(--primary)' : 'var(--accent)'} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
+                </Card>
+
+                <Card className="p-6 lg:p-8 flex flex-col min-h-[350px]">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-2.5 h-2.5 rounded-full bg-[var(--accent)]"></div>
+                        <h3 className="text-lg font-bold tracking-tight">Consistency Trend</h3>
+                    </div>
+                    <div className="flex-grow w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={summaryItems}>
-                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--foreground-muted)', fontSize: 12}} />
-                                <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--foreground-muted)', fontSize: 12}} />
-                                <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{backgroundColor: 'var(--card-bg)', border: 'none', borderRadius: '8px'}} />
-                                <Bar dataKey="score" radius={[8, 8, 0, 0]}>
-                                    {summaryItems.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={index % 2 === 0 ? 'var(--primary)' : 'var(--accent)'} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
+                            <LineChart data={studyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.03)" />
+                                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: 'var(--foreground-muted)', fontSize: 10, fontWeight: 700}} />
+                                <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--foreground-muted)', fontSize: 10}} />
+                                <Tooltip 
+                                    contentStyle={{backgroundColor: 'var(--card-bg)', border: 'none', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)'}} 
+                                    itemStyle={{color: 'var(--primary)', fontWeight: 800}}
+                                />
+                                <Line type="monotone" dataKey="hours" stroke="var(--primary)" strokeWidth={4} dot={{fill: 'var(--primary)', strokeWidth: 2, r: 4, stroke: '#fff'}} activeDot={{r: 6, strokeWidth: 0}} />
+                            </LineChart>
                         </ResponsiveContainer>
                     </div>
-                )}
-                <div className="mt-4 text-center">
-                    <p className="text-sm text-[var(--foreground-muted)]">Data retrieved from your <span className="text-[var(--primary)] font-bold">Supabase Project</span></p>
-                </div>
-            </Card>
-
-            <Card className="flex flex-col">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="w-3 h-3 rounded-full bg-[var(--accent)]"></div>
-                    <h3 className="text-xl font-bold">AI Study Consistency</h3>
-                </div>
-                <div className="h-64 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={studyData}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                            <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: 'var(--foreground-muted)', fontSize: 12}} />
-                            <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--foreground-muted)', fontSize: 12}} />
-                            <Tooltip 
-                                contentStyle={{backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)', borderRadius: '12px'}} 
-                                itemStyle={{color: 'var(--primary)'}}
-                            />
-                            <Line type="monotone" dataKey="hours" stroke="var(--primary)" strokeWidth={3} dot={{fill: 'var(--primary)', r: 4}} activeDot={{r: 8}} />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </div>
-            </Card>
-
-            <Card className="lg:col-span-2">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-                    <div>
-                        <p className="text-[var(--foreground-muted)] text-sm uppercase tracking-widest font-bold mb-1">Concept Mastery</p>
-                        <p className="text-5xl font-black text-[var(--primary)]">{stats.avgQuizScore}%</p>
-                        <p className="text-xs text-[var(--foreground-muted)] mt-2">Based on {stats.quizzesTaken} Quiz Turns</p>
-                    </div>
-                    <div>
-                        <p className="text-[var(--foreground-muted)] text-sm uppercase tracking-widest font-bold mb-1">Task Efficiency</p>
-                        <p className="text-5xl font-black text-[var(--accent)]">{completionRate}%</p>
-                        <p className="text-xs text-[var(--foreground-muted)] mt-2">{stats.tasksDone}/{stats.tasksTotal} Planner Tasks Completed</p>
-                    </div>
-                    <div>
-                        <p className="text-[var(--foreground-muted)] text-sm uppercase tracking-widest font-bold mb-1">Learning Assets</p>
-                        <p className="text-5xl font-black text-orange-500">{stats.flashcardSets}</p>
-                        <p className="text-xs text-[var(--foreground-muted)] mt-2">Flashcard Decks in Cloud</p>
-                    </div>
-                </div>
-            </Card>
+                </Card>
+            </div>
+            
+            <div className="text-center opacity-40">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em]">End of Sync History</p>
+            </div>
         </div>
     );
 };

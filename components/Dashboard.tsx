@@ -42,7 +42,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userProfile, theme, toggleTheme }
         }`}
       >
         <div className={`transition-transform duration-500 ${active ? 'scale-110' : 'group-hover:scale-110'}`}>
-          {React.cloneElement(icon as React.ReactElement, { strokeWidth: 1.2 })}
+          {/* FIX: Cast icon to any to avoid "strokeWidth" property error on unknown type */}
+          {React.cloneElement(icon as any, { strokeWidth: 1.2 })}
         </div>
         <span className="ml-4 text-[14px] font-semibold tracking-tight">{label}</span>
       </button>
